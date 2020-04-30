@@ -1,8 +1,4 @@
-# pfuncs library #
-
-Library : pfuncs
-Author 	: hotzsauce
-Date 	: April 30, 2020
+# pfuncs #
 
 ### Description ###
 
