@@ -2,32 +2,29 @@
 from pfuncs.lexer import Lexer
 
 from pfuncs.functions import (
-	FunctionParser,
-	FunctionInterpreter
+	Parser,
+	Interpreter
 )
 
 
-class Reader(object):
+def call(text):
+	lexer = Lexer(text)
+	parser = Parser(lexer)
+
+	tree = parser.parse()
+	interpreter = Interpreter(tree)
+
+	return interpreter.interpret()
+
+class Caller(object):
 
 	def __init__(self, text):
 		self.lexer = Lexer(text)
-		self.parser = FunctionParser(self.lexer)
-
-	def read(self):
-		tree = self.tree
-
-		self.interpreter = FunctionInterpreter(tree)
-		result = self.interpreter.interpret()
-
-		print('{expr} = {result}'.format(
-				expr=self.lexer.text,
-				result=result
-			)
-		)
+		self.parser = Parser(self.lexer)
 
 	def call(self):
 		tree = self.tree
-		self.interpreter = FunctionInterpreter(tree)
+		self.interpreter = Interpreter(tree)
 		return self.interpreter.interpret()
 
 	def summarize_tokens(self):
