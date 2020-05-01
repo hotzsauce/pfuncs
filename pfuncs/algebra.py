@@ -1,13 +1,12 @@
 
-import ast
+import pfuncs.ast as ast
 
-from tokens import Token
-from generic import (
+from pfuncs.tokens import Token
+from pfuncs.generic import (
 	ABCParser,
 	ABCVisitor
 )
-
-from base import (
+from pfuncs.base import (
 	# number, variable name, parentheses
 	NUMBER, 
 	ID,

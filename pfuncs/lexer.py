@@ -1,11 +1,9 @@
 
 
+import pfuncs.base as base
+import pfuncs.functions as fnc 
 
-import base
-
-import functions as fnc 
-
-from tokens import Token 
+from pfuncs.tokens import Token 
 
 RESERVED_KEYWORDS = {
 	**fnc.RESERVED_KEYWORDS
@@ -89,6 +87,7 @@ class Lexer(object):
 				self.current_char == '*'
 				and self.peek() == '*'
 			):
+				self.advance()
 				self.advance()
 				return Token(base.POWER, '**')
 

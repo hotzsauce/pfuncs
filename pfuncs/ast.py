@@ -55,9 +55,8 @@ class BinaryOp(AST):
 
 class UnaryOp(AST):
 
-	def __init__(self, token, expr):
-		self.token = token
-		self.value - self.token.value
+	def __init__(self, op, expr):
+		self.op = op
 		self.expr = expr
 
 

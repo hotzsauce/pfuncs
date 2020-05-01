@@ -6,12 +6,11 @@ by pfuncs
 import numpy as np
 from scipy.special import erf
 
-import ast 
-import base
+import pfuncs.ast as ast 
+import pfuncs.base as base
+import pfuncs.algebra as alg
 
-import algebra as alg
-
-from tokens import Token 
+from pfuncs.tokens import Token 
 
 
 FUNCTION 	= 'FUNCTION'
