@@ -1,9 +1,9 @@
 
 from pfuncs.lexer import Lexer
 
-from pfuncs.algebra import (
-	AlgebraParser,
-	AlgebraInterpreter
+from pfuncs.functions import (
+	FunctionParser,
+	FunctionInterpreter
 )
 
 
@@ -11,12 +11,12 @@ class Reader(object):
 
 	def __init__(self, text):
 		self.lexer = Lexer(text)
-		self.parser = AlgebraParser(self.lexer)
+		self.parser = FunctionParser(self.lexer)
 
 	def read(self):
 		tree = self.tree
 
-		self.interpreter = AlgebraInterpreter(tree)
+		self.interpreter = FunctionInterpreter(tree)
 		result = self.interpreter.interpret()
 
 		print('{expr} = {result}'.format(
@@ -25,7 +25,10 @@ class Reader(object):
 			)
 		)
 
-		return result
+	def call(self):
+		tree = self.tree
+		self.interpreter = FunctionInterpreter(tree)
+		return self.interpreter.interpret()
 
 	def summarize_tokens(self):
 		for t in self.lexer.token_stream:
@@ -42,3 +45,5 @@ class Reader(object):
 		else:
 			self._tree = self.parser.parse()
 			return self._tree
+
+	

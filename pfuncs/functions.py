@@ -28,6 +28,9 @@ TAN 	= 'tan'
 ASIN 	= 'asin'
 ACOS 	= 'acos'
 ATAN 	= 'atan'
+FLOOR  	= 'floor'
+CEIL 	= 'ceil'
+INT 	= 'int'
 MAX 	= 'max'
 MIN 	= 'min'
 NORMCDF = 'normcdf'
@@ -49,6 +52,9 @@ RESERVED_KEYWORDS = {
 	ASIN: 		Token(FUNCTION, ASIN),
 	ACOS: 		Token(FUNCTION, ACOS),
 	ATAN: 		Token(FUNCTION, ATAN),
+	FLOOR: 		Token(FUNCTION, FLOOR),
+	CEIL:		Token(FUNCTION, CEIL),
+	INT: 		Token(FUNCTION, INT),
 	MAX: 		Token(FUNCTION, MAX),
 	MIN: 		Token(FUNCTION, MIN),
 	NORMCDF: 	Token(FUNCTION, NORMCDF),
@@ -57,10 +63,10 @@ RESERVED_KEYWORDS = {
 }
 
 
-class FunctionParser(alg.AlgebraParser):
+class Parser(alg.Parser):
 	""" 
-	The FunctionParser adds a call() method inbetween the exponent() and atom() 
-	methods of the super-class AlgebraParser
+	The pfuncs.functions.Parser adds a call() method between the exponent() and 
+	atom() methods of the super-class pfuncs.algebra.Parser
 	"""
 
 	def __init__(self, lexer):
@@ -95,46 +101,58 @@ class FunctionParser(alg.AlgebraParser):
 
 
 
-class FunctionInterpreter(alg.AlgebraInterpreter):
+class Interpreter(alg.Interpreter):
+	"""
+	Augments pfuncs.algebra.Interpreter by adding visit_Function method
+	"""
 
 	def visit_Function(self, node):
 		f = node.value
 
 		if f == EXP:
-			return np.exp(self.visit(node.expr))
+			return lambda x: np.exp(self.visit(node.expr)(x))
 
 		if (f == LOG) or (f == LN):
-			return np.log(self.visit(node.expr))
+			return lambda x: np.log(self.visit(node.expr)(x))
 
 		if f == LOG10:
-			return np.log10(self.visit(node.expr))
+			return lambda x: np.log10(self.visit(node.expr)(x))
 
 		if f == SQRT:
-			return np.sqrt(self.visit(node.expr))
+			return lambda x: np.sqrt(self.visit(node.expr)(x))
 
 		if f == ABS:
-			return np.abs(self.visit(node.expr))
+			return lambda x: np.abs(self.visit(node.expr)(x))
 
 		if f == SIGN:
-			return np.sign(self.visit(node.expr))
+			return lambda x: np.sign(self.visit(node.expr)(x))
 
 		if f == SIN:
-			return np.sin(self.visit(node.expr))
+			return lambda x: np.sin(self.visit(node.expr)(x))
 
 		if f == COS:
-			return np.cos(self.visit(node.expr))
+			return lambda x: np.cos(self.visit(node.expr)(x))
 
 		if f == TAN:
-			return np.tan(self.visit(node.expr))
+			return lambda x: np.tan(self.visit(node.expr)(x))
 
 		if f == ASIN:
-			return np.arcsin(self.visit(node.expr))
+			return lambda x: np.arcsin(self.visit(node.expr)(x))
 
 		if f == ACOS:
-			return np.arccos(self.visit(node.expr))
+			return lambda x: np.arccos(self.visit(node.expr)(x))
 
 		if f == ATAN:
-			return np.arctan(self.visit(node.expr))
+			return lambda x: np.arctan(self.visit(node.expr)(x))
+
+		if f == FLOOR:
+			return lambda x: np.floor(self.visit(node.expr)(x))
+
+		if f == CEIL:
+			return lambda x: np.ceil(self.visit(node.expr)(x))
+
+		if f == INT:
+			return lambda x: int(self.visit(node.expr)(x))
 
 		if f == MAX:
 			raise NotImplementedError(MAX)
@@ -149,4 +167,4 @@ class FunctionInterpreter(alg.AlgebraInterpreter):
 			raise NotImplementedError(NORMPDF)	
 
 		if f == ERF:
-			return erf(self.visit(node.expr))
+			return lambda x: erf(self.visit(node.expr)(x))

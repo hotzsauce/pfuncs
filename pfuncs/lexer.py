@@ -2,11 +2,13 @@
 
 import pfuncs.base as base
 import pfuncs.functions as fnc 
+import pfuncs.constants as cst
 
 from pfuncs.tokens import Token 
 
 RESERVED_KEYWORDS = {
-	**fnc.RESERVED_KEYWORDS
+	**fnc.RESERVED_KEYWORDS,
+	**cst.RESERVED_KEYWORDS
 }
 
 class Lexer(object):
