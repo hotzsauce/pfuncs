@@ -110,49 +110,49 @@ class Interpreter(alg.Interpreter):
 		f = node.value
 
 		if f == EXP:
-			return lambda x: np.exp(self.visit(node.expr)(x))
-
+			return np.exp(self.visit(node.expr))
+	
 		if (f == LOG) or (f == LN):
-			return lambda x: np.log(self.visit(node.expr)(x))
+			return np.log(self.visit(node.expr))
 
 		if f == LOG10:
-			return lambda x: np.log10(self.visit(node.expr)(x))
+			return np.log10(self.visit(node.expr))
 
 		if f == SQRT:
-			return lambda x: np.sqrt(self.visit(node.expr)(x))
+			return np.sqrt(self.visit(node.expr))
 
 		if f == ABS:
-			return lambda x: np.abs(self.visit(node.expr)(x))
+			return np.abs(self.visit(node.expr))
 
 		if f == SIGN:
-			return lambda x: np.sign(self.visit(node.expr)(x))
+			return np.sign(self.visit(node.expr))
 
 		if f == SIN:
-			return lambda x: np.sin(self.visit(node.expr)(x))
+			return np.sin(self.visit(node.expr))
 
 		if f == COS:
-			return lambda x: np.cos(self.visit(node.expr)(x))
+			return np.cos(self.visit(node.expr))
 
 		if f == TAN:
-			return lambda x: np.tan(self.visit(node.expr)(x))
+			return np.tan(self.visit(node.expr))
 
 		if f == ASIN:
-			return lambda x: np.arcsin(self.visit(node.expr)(x))
+			return np.arcsin(self.visit(node.expr))
 
 		if f == ACOS:
-			return lambda x: np.arccos(self.visit(node.expr)(x))
+			return np.arccos(self.visit(node.expr))
 
 		if f == ATAN:
-			return lambda x: np.arctan(self.visit(node.expr)(x))
+			return np.arctan(self.visit(node.expr))
 
 		if f == FLOOR:
-			return lambda x: np.floor(self.visit(node.expr)(x))
+			return np.floor(self.visit(node.expr))
 
 		if f == CEIL:
-			return lambda x: np.ceil(self.visit(node.expr)(x))
+			return np.ceil(self.visit(node.expr))
 
 		if f == INT:
-			return lambda x: int(self.visit(node.expr)(x))
+			return int(self.visit(node.expr))
 
 		if f == MAX:
 			raise NotImplementedError(MAX)
@@ -167,4 +167,5 @@ class Interpreter(alg.Interpreter):
 			raise NotImplementedError(NORMPDF)	
 
 		if f == ERF:
-			return lambda x: erf(self.visit(node.expr)(x))
+			return erf(self.visi(node.expr))
+			

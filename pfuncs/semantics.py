@@ -54,9 +54,11 @@ class ScopedSymbolTable(object):
 		self.insert(BuiltinTypeSymbol(NUMBER))
 
 	def insert(self, symbol):
+		# method used by Semantic Analyzer, adds name of variable and Symbol
 		self._symbols[symbol.name] = symbol
 
 	def lookup(self, name):
+		# method used by Semantic Analyzer, retrieves Symbol by name
 		return self._symbols.get(name)
 
 	@property
@@ -87,6 +89,52 @@ class ScopedSymbolTable(object):
 		)
 		lines.append('\n')
 		return '\n'.join(lines)
+
+
+class ScopedMemory(object):
+
+	def __init__(self, scope_name, scope_level):
+		self._variables = {}
+		self.scope_name = scope_name
+		self.scope_level = scope_level
+
+	def assign(self, key, value):
+		# method used by pfunc callable, basically assigns the variable name
+		#	and user-provided value to 'local memory'
+		self._variables[key] = value
+
+	def retrieve(self, key):
+		# method used by pfunc callable, retrieves assigned value by var name.
+		#	no need to check for KeyErrors, as that is done by the parent pfunc
+		#	this ScopedMemory object is assigned to
+		return self._variables[key]
+
+	@property
+	def variables(self):
+		return list(self._variables.keys())
+
+	def __str__(self):
+
+		n_delims = 50
+		h1 = 'SCOPE (Scoped Memory)'
+		lines = ['\n', h1, '='*n_delims]
+		for header_name, header_value in (
+			('Scope Name', self.scope_name),
+			('Scope Level', self.scope_level)
+		):
+			lines.append('{:<15}: {}'.format(header_name, header_value))
+
+		h2 = 'Scope (Scoped Memory) Contents'
+		lines.extend([h2, '-'*n_delims])
+		lines.extend(
+			(('{:>15}: {}').format(k, v)
+			for k, v in self._variables.items()
+			if not isinstance(v, BuiltinTypeSymbol))
+		)
+		lines.append('\n')
+		return '\n'.join(lines)
+
+
 
 
 class SemanticAnalyzer(ABCVisitor):
@@ -120,7 +168,7 @@ class SemanticAnalyzer(ABCVisitor):
 		self.scope.insert(var_symbol)
 
 	def visit_Function(self, node):
-		pass
+		self.visit(node.expr)
 
 	def analyze(self):
 		self.visit(self.tree)

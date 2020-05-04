@@ -6,13 +6,22 @@ from pfuncs.functions import (
 	Interpreter
 )
 
+from pfuncs.semantics import SemanticAnalyzer
+
 
 def call(text):
 	lexer = Lexer(text)
 	parser = Parser(lexer)
 
 	tree = parser.parse()
-	interpreter = Interpreter(tree)
+
+	sem_analyzer = SemanticAnalyzer(tree)
+	sem_analyzer.analyze()
+
+	interpreter = Interpreter(
+					tree=tree,
+					variables=sem_analyzer.variables
+	)
 
 	return interpreter.interpret()
 
@@ -24,8 +33,17 @@ class Caller(object):
 
 	def call(self):
 		tree = self.tree
-		self.interpreter = Interpreter(tree)
+
+		self.sem_analyzer = SemanticAnalyzer(tree)
+		self.sem_analyzer.analyze()
+		var_tup = self.sem_analyzer.variables
+
+		self.interpreter = Interpreter(
+							tree=tree,
+							variables=var_tup
+		)
 		return self.interpreter.interpret()
+
 
 	def summarize_tokens(self):
 		for t in self.lexer.token_stream:
