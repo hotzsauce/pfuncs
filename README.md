@@ -23,7 +23,7 @@ for _ in range(30):
 print(p) 	# 1.6180339887496482
 ```
 
-2. We can approximate Euler's constant $e$ using the first (historical) formula
+2. We can approximate Euler's constant _e_ using the first (historical) formula
 ```python
 euler = pfuncs.call('(1 + 1/n)**n')
 print(euler(100))	# 2.704814
@@ -46,31 +46,31 @@ print(mortgage(p=principal, r=rate)) 	# 646132.112848
 
 ### Built-in Functions ###
 The following functions are recognized as built-in functions by `pfuncs`:
-* e^x, $exp()$
-* natural log, $log()$ or $ln()$
-* log base 10, $log10()$
-* square root, $sqrt()$
-* absolute value, $abs()$
-* signum function, $sign()$
-* sine, $sin()$
-* cosine, $cos()$
-* tangent, $tan()$
-* arcsine, $arcsin()$
-* arccosine, $arccos()$
-* floor function, $floor()$
-* ceiling function, $ceil()$
-* integer function, $int()$
-* Gaussian error function, $erf()$
+* e^x, _exp( )_
+* natural log, _log( )_ or _ln( )_
+* log base 10, _log10( )_
+* square root, _sqrt( )_
+* absolute value, _abs( )_
+* signum function, _sign( )_
+* sine, _sin( )_
+* cosine, _cos( )_
+* tangent, _tan( )_
+* arcsine, _arcsin( )_
+* arccosine, _arccos( )_
+* floor function, _floor( )_
+* ceiling function, _ceil( )_
+* integer function, _int( )_
+* Gaussian error function, _erf( )_
 
 Additionally, the following are recognized, but not implemented. I didn't really feel like parsing commas & optional parameters yet:
-* minimum, $min(a, b, c, ...)$
-* maximum, $max(a, b, c, ...)$
-* normal cumulative distribution function, $normcdf(x, mu, sigma)$
-* normal probability distribution function, $normcdf(x, mu, sigma)$
+* minimum, _min(a, b, c, ...)_
+* maximum, _max(a, b, c, ...)_
+* normal cumulative distribution function, _normcdf(x, mu, sigma)_
+* normal probability distribution function, _normcdf(x, mu, sigma)_
 
 
 ### Notes ###
-* expressions are case-sensitive, so all built-in functions and constants ($e$ and $pi$ for now) need to be lowercase
+* expressions are case-sensitive, so all built-in functions and constants (_e_ and <img src="https://render.githubusercontent.com/render/math?math=pi"> for now) need to be lowercase
 * although not explicitly designed to handle numpy ndarray inputs, `pfuncs` accepts and evaluates them correctly as variable inputs. However, the Lexer and Parser are not designed to handle them as a term in the string expression
 
 
@@ -80,6 +80,6 @@ The parsing & interpreting framework are based almost solely on [Ruslan Spivak's
 
 ### To-Do ###
 * Implement the minumum, maximum, CDF, and PDF functions
-* Allow for complex numbers. Went to all that trouble to implement $e$ - might as well make use of it.
+* Allow for complex numbers. Went to all that trouble to implement _e_ - might as well make use of it.
 * (?) If a value is not provided for a multi-variate function, return another function that will accept that variable as an argument; i.e. allow for currying
 * (?) If a lexeme is tagged as an ID, search local namespace for that string & assume it's a function, thereby allowing for composition of functions
