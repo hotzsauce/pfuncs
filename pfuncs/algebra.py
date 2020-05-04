@@ -2,6 +2,7 @@
 import pfuncs.ast as ast
 
 from pfuncs.tokens import Token
+from pfuncs.semantics import ScopedMemory
 from pfuncs.generic import (
 	ABCParser,
 	ABCVisitor
@@ -119,34 +120,49 @@ class Interpreter(ABCVisitor):
 	pfuncs.algebra.Parser, i.e. cannot handle built-in function calls
 	"""
 
-	def __init__(self, tree):
+	def __init__(self, tree, variables):
 		super().__init__(tree)
+		self.variables = variables
 
 	def visit_Num(self, node):
-		return lambda x: node.value
+		return node.value
 
 	def visit_Var(self, node):
-		return lambda x: x
+		v = self.scope.retrieve(node.value)
+		return v
 
 	def visit_UnaryOp(self, node):
 		if node.op.type == PLUS:
-			return lambda x: + self.visit(node.expr)(x)
+			return + self.visit(node.expr)
 		elif node.op.type == MINUS:
-			return lambda x: - self.visit(node.expr)(x)
+			return - self.visit(node.expr)
 
 	def visit_BinaryOp(self, node):
 		if node.op.type == PLUS:
-			return lambda x: self.visit(node.left)(x) + self.visit(node.right)(x)
+			return self.visit(node.left) + self.visit(node.right)
 		elif node.op.type == MINUS:
-			return lambda x: self.visit(node.left)(x) - self.visit(node.right)(x)
+			return self.visit(node.left) - self.visit(node.right)
 		elif node.op.type == MUL:
-			return lambda x: self.visit(node.left)(x) * self.visit(node.right)(x)
+			return self.visit(node.left) * self.visit(node.right)
 		elif node.op.type == DIV:
-			return lambda x: self.visit(node.left)(x) / self.visit(node.right)(x)
+			return self.visit(node.left) / self.visit(node.right)
 		elif node.op.type == POWER:
-			return lambda x: self.visit(node.left)(x) ** self.visit(node.right)(x)
+			return self.visit(node.left) ** self.visit(node.right)
+
 
 	def interpret(self):
-		return self.visit(self.tree)
 
+		def func(**kwargs):
+			# assign the user-provided variable names and values to local memory
+			self.scope = ScopedMemory(scope_name='pfunc', scope_level=1)
+			for k, v in kwargs.items():
+				self.scope.assign(k, v)
+			# verifies user-provided variable names are all found in expression
+			for v in self.scope.variables:
+				if v not in self.variables:
+					raise NameError(v) from None
+				else:
+					pass
+			return self.visit(self.tree)
 
+		return func
