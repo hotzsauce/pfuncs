@@ -70,7 +70,7 @@ Additionally, the following are recognized, but not implemented. I didn't really
 
 
 ### Notes ###
-* expressions are case-sensitive, so all built-in functions and constants (_e_ and <img src="https://render.githubusercontent.com/render/math?math=pi"> for now) need to be lowercase
+* expressions are case-sensitive, so all built-in functions and constants (_e_ and _pi_ for now) need to be lowercase
 * although not explicitly designed to handle numpy ndarray inputs, `pfuncs` accepts and evaluates them correctly as variable inputs. However, the Lexer and Parser are not designed to handle them as a term in the string expression
 
 
