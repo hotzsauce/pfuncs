@@ -14,7 +14,7 @@ given expression
 
 
 ### Examples ###
-1. Using the fixed point of $f(x) = 1 + 1/x$ to approximate the Golden Ratio
+1. Using the fixed point of <img src="https://render.githubusercontent.com/render/math?math=f(x) = 1 %2B 1/x"> to approximate the Golden Ratio
 ```python
 phi = pfuncs.call('1/x + 1')
 p = 1
@@ -26,7 +26,7 @@ print(p) 	# 1.6180339887496482
 2. We can approximate Euler's constant $e$ using the first (historical) formula
 ```python
 euler = pfuncs.call('(1 + 1/n)**n')
-print(euler(100))		# 2.704814
+print(euler(100))	# 2.704814
 print(euler(5000)) 	# 2.718010
 ```
 The convergence of this formula is obviously very slow, so `pfuncs` recognizes 'e' as a special constants in expressions:
@@ -71,7 +71,7 @@ Additionally, the following are recognized, but not implemented. I didn't really
 
 ### Notes ###
 * expressions are case-sensitive, so all built-in functions and constants ($e$ and $pi$ for now) need to be lowercase
-* although not explicitly designed to handle numpy ndarray inputs, pfuncs accepts and evaluates them correctly as variable inputs. However, the Lexer and Parser are not designed to handle them as a term in the string expression
+* although not explicitly designed to handle numpy ndarray inputs, `pfuncs` accepts and evaluates them correctly as variable inputs. However, the Lexer and Parser are not designed to handle them as a term in the string expression
 
 
 ### Thanks ###
