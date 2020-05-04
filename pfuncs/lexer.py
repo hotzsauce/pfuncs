@@ -1,5 +1,6 @@
-
-
+"""
+module containing Lexer object for the pfuncs library
+"""
 import pfuncs.base as base
 import pfuncs.functions as fnc 
 import pfuncs.constants as cst
@@ -119,8 +120,6 @@ class Lexer(object):
 
 			if self.current_char is not None:
 				self.error(self.current_char)
-			
-
 
 	def tokenize(self):
 		""" reads the source codes and generates a list of tokens from it """
@@ -143,5 +142,3 @@ class Lexer(object):
 		token = self.token_stream[self.token_pos]
 		self.token_pos += 1 
 		return token
-
-

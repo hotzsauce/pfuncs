@@ -1,4 +1,6 @@
-
+"""
+module with Abstract Base Classes for parsers, and AST-climbing objects
+"""
 
 class ABCParser(object):
 	""" Abstract Base Class for parser """

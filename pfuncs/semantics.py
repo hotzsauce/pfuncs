@@ -1,5 +1,9 @@
-
-
+"""
+module for verifying syntax of the mathematical expressions, as well as 
+storing the value of the arguments of a called function. A bit over-engineered
+at the moment, but should be more easily extensible than if this module
+were not made
+"""
 from pfuncs.base import NUMBER
 from pfuncs.generic import ABCVisitor
 
@@ -104,37 +108,15 @@ class ScopedMemory(object):
 		self._variables[key] = value
 
 	def retrieve(self, key):
-		# method used by pfunc callable, retrieves assigned value by var name.
-		#	no need to check for KeyErrors, as that is done by the parent pfunc
-		#	this ScopedMemory object is assigned to
-		return self._variables[key]
+		# method used by pfunc callable, retrieves assigned value by var name
+		try:
+			return self._variables[key]
+		except KeyError:
+			raise NameError('Value for \'{}\' not provided.'.format(key)) from None
 
 	@property
 	def variables(self):
 		return list(self._variables.keys())
-
-	def __str__(self):
-
-		n_delims = 50
-		h1 = 'SCOPE (Scoped Memory)'
-		lines = ['\n', h1, '='*n_delims]
-		for header_name, header_value in (
-			('Scope Name', self.scope_name),
-			('Scope Level', self.scope_level)
-		):
-			lines.append('{:<15}: {}'.format(header_name, header_value))
-
-		h2 = 'Scope (Scoped Memory) Contents'
-		lines.extend([h2, '-'*n_delims])
-		lines.extend(
-			(('{:>15}: {}').format(k, v)
-			for k, v in self._variables.items()
-			if not isinstance(v, BuiltinTypeSymbol))
-		)
-		lines.append('\n')
-		return '\n'.join(lines)
-
-
 
 
 class SemanticAnalyzer(ABCVisitor):
@@ -146,7 +128,6 @@ class SemanticAnalyzer(ABCVisitor):
 						scope_level=1
 		)
 
-	# ALGEBRA & FUNCTIONS
 	def visit_BinaryOp(self, node):
 		self.visit(node.left)
 		self.visit(node.right)

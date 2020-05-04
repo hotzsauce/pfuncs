@@ -1,8 +1,8 @@
 """
 module for listing, parsing, and interpreting the built-in functions supported
-by pfuncs
+by pfuncs. Both Parser and Interpreter inherit most of the their functionality
+from the analogous objects in pfuncs.algebra
 """
-
 import numpy as np
 from scipy.special import erf
 
@@ -168,4 +168,3 @@ class Interpreter(alg.Interpreter):
 
 		if f == ERF:
 			return erf(self.visi(node.expr))
-			

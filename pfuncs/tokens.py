@@ -1,5 +1,6 @@
-
-
+"""
+module for Token, the basic lexeme object
+"""
 class Token(object):
 
 	def __init__(

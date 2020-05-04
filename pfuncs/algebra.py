@@ -1,4 +1,8 @@
-
+"""
+module for algebra-based parser and interpreter. These can function as stand-alone
+objects, but for the purposes of the pfuncs library they act as superclasses for
+the Parser and Interpreter objects in pfuncs.functions
+"""
 import pfuncs.ast as ast
 
 from pfuncs.tokens import Token
@@ -149,20 +153,30 @@ class Interpreter(ABCVisitor):
 		elif node.op.type == POWER:
 			return self.visit(node.left) ** self.visit(node.right)
 
-
 	def interpret(self):
 
-		def func(**kwargs):
-			# assign the user-provided variable names and values to local memory
-			self.scope = ScopedMemory(scope_name='pfunc', scope_level=1)
-			for k, v in kwargs.items():
-				self.scope.assign(k, v)
-			# verifies user-provided variable names are all found in expression
-			for v in self.scope.variables:
-				if v not in self.variables:
-					raise NameError(v) from None
-				else:
-					pass
-			return self.visit(self.tree)
+		if len(self.variables) == 1:
+			def func(*args):
+				if len(args) != 1:
+					raise ValueError('Too many arguments.')
+
+				# assign the only variable name to the given value
+				self.scope = ScopedMemory(scope_name='pfunc', scope_level=1)
+				self.scope.assign(self.variables[0], args[0])
+				return self.visit(self.tree)
+
+		else:
+			def func(**kwargs):
+				# assign the user-provided variable names and values to local memory
+				self.scope = ScopedMemory(scope_name='pfunc', scope_level=1)
+				for k, v in kwargs.items():
+					self.scope.assign(k, v)
+				# verifies user-provided variable names are all found in expression
+				for v in self.scope.variables:
+					if v not in self.variables:
+						raise NameError(v) from None
+					else:
+						pass
+				return self.visit(self.tree)
 
 		return func
