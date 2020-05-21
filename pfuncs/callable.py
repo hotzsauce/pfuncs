@@ -13,7 +13,7 @@ from pfuncs.functions import (
 	Interpreter
 )
 from pfuncs.curry import Curryer
-
+from pfuncs.utils import Writer
 
 class PFunc(object):
 	"""
@@ -137,6 +137,11 @@ class PFunc(object):
 			tree=self.tree, 
 			scope=self.scope).curry()
 		)
+
+	@property
+	def text(self):
+		author = Writer(self.tree)
+		return author.write()
 
 	def __call__(self, *args, **kwargs):
 		if len(self.variables) == 1:
