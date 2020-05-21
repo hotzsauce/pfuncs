@@ -99,8 +99,6 @@ class Parser(alg.Parser):
 		return node
 
 
-
-
 class Interpreter(alg.Interpreter):
 	"""
 	Augments pfuncs.algebra.Interpreter by adding visit_Function method
@@ -167,4 +165,4 @@ class Interpreter(alg.Interpreter):
 			raise NotImplementedError(NORMPDF)	
 
 		if f == ERF:
-			return erf(self.visi(node.expr))
+			return erf(self.visit(node.expr))
