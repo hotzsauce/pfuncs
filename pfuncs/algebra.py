@@ -25,7 +25,6 @@ from pfuncs.base import (
 	POWER
 )
 
-
 class Parser(ABCParser):
 	"""
 	Parses algebraic expressions with numbers, variables, addition, subtraction,
@@ -124,9 +123,9 @@ class Interpreter(ABCVisitor):
 	pfuncs.algebra.Parser, i.e. cannot handle built-in function calls
 	"""
 
-	def __init__(self, tree, variables):
+	def __init__(self, tree, scope):
 		super().__init__(tree)
-		self.variables = variables
+		self.scope = scope
 
 	def visit_Num(self, node):
 		return node.value
@@ -154,29 +153,4 @@ class Interpreter(ABCVisitor):
 			return self.visit(node.left) ** self.visit(node.right)
 
 	def interpret(self):
-
-		if len(self.variables) == 1:
-			def func(*args):
-				if len(args) != 1:
-					raise ValueError('Too many arguments.')
-
-				# assign the only variable name to the given value
-				self.scope = ScopedMemory(scope_name='pfunc', scope_level=1)
-				self.scope.assign(self.variables[0], args[0])
-				return self.visit(self.tree)
-
-		else:
-			def func(**kwargs):
-				# assign the user-provided variable names and values to local memory
-				self.scope = ScopedMemory(scope_name='pfunc', scope_level=1)
-				for k, v in kwargs.items():
-					self.scope.assign(k, v)
-				# verifies user-provided variable names are all found in expression
-				for v in self.scope.variables:
-					if v not in self.variables:
-						raise NameError(v) from None
-					else:
-						pass
-				return self.visit(self.tree)
-
-		return func
+		return self.visit(self.tree)
