@@ -2,13 +2,20 @@
 module for helpful AST-walkers & functions that use them
 """
 import copy
+import functools
 
+import pfuncs.ast as ast
+import pfuncs.callable as call 
+
+from pfuncs.tokens import Token
 from pfuncs.generic import ABCVisitor
 from pfuncs.base import (
+	NUMBER,
 	PLUS,
 	MINUS,
 	MUL,
-	DIV
+	DIV,
+	POWER
 )
 
 
@@ -63,6 +70,160 @@ class Writer(ABCVisitor):
 		return self.text
 
 
+class Reducer(ABCVisitor):
+
+	# additive and multiplicative identities
+	aident = 0
+	mident = 1
+
+	def __init__(self, tree):
+		self.tree = self._copy(tree)
+
+		# visit all the nodes in the usual recursive way. We call _reduce() here
+		# 	in case self.tree ends up being a Binary or Unary op that can be 
+		#	reduced even futher
+		self.visit(self.tree)
+		final_tree = self._reduce(self.tree)
+		if final_tree:
+			self.tree = final_tree
+
+	def _copy(self, tree):
+		return copy.deepcopy(tree)
+
+	def _both_numbers(self, node1, node2):
+		return isinstance(node1, ast.Num) and isinstance(node2, ast.Num)
+
+	def _is_equal_to(self, node, number):
+		if isinstance(node, ast.Num):
+			if node.value == number:
+				return True
+		return False
+
+	def _reduce_attr(self, node, attr):
+		new_attr = self._reduce(getattr(node, attr))
+		if new_attr:
+			setattr(node, attr, new_attr)
+
+	def _reduce(self, node):
+		if isinstance(node, ast.BinaryOp):
+			return self._reduce_BinaryOp(node)
+		if isinstance(node, ast.UnaryOp):
+			return self._reduce_UnaryOp(node)
+
+	def _reduce_BinaryOp(self, node):
+		if node.op.type == PLUS:
+			return self._reduce_addition(node)
+		elif node.op.type == MINUS:
+			return self._reduce_subtraction(node)
+		elif node.op.type == MUL:
+			return self._reduce_multiplication(node)
+		elif node.op.type == DIV:
+			return self._reduce_division(node)
+		elif node.op.type == POWER:
+			return self._reduce_power(node)
+		
+	def _reduce_addition(self, node):
+		if self._both_numbers(node.left, node.right):
+			value = node.left.value + node.right.value
+			return ast.Num(Token(NUMBER, value))
+		elif self._is_equal_to(node.left, self.aident):
+			return node.right
+		elif self._is_equal_to(node.right, self.aident):
+			return node.left
+
+	def _reduce_subtraction(self, node):
+		if self._both_numbers(node.left, node.right):
+			value = node.left.value - node.right.value
+			return ast.Num(Token(NUMBER, value))
+		elif self._is_equal_to(node.left, self.aident):
+			return ast.UnaryOp(
+				op=Token(MINUS, '-'),
+				expr=node.right
+			)
+		elif self._is_equal_to(node.right, self.aident):
+			return node.left
+		elif isinstance(node.right, ast.UnaryOp):
+			if node.right.op.type == MINUS:
+				setattr(node, 'op', Token(PLUS, '+'))
+				setattr(node, 'right', node.expr.expr)
+			return node
+			
+	def _reduce_multiplication(self, node):
+		if self._both_numbers(node.left, node.right):
+			value = node.left.value * node.right.value
+			return ast.Num(Token(NUMBER, value))
+		elif (
+			self._is_equal_to(node.left, self.aident)
+			or self._is_equal_to(node.right, self.aident)
+		):
+			return ast.Num(Token(NUMBER, self.aident))
+		elif self._is_equal_to(node.left, self.mident):
+			return node.right
+		elif self._is_equal_to(node.right, self.mident):
+			return node.left
+
+	def _reduce_division(self, node):
+		if self._both_numbers(node.left, node.right):
+			value = node.left.value / node.right.value
+			return ast.Num(Token(NUMBER, value))
+		elif self._is_equal_to(node.left, self.aident):
+			return ast.Num(Token(NUMBER, self.aident))
+		elif self._is_equal_to(node.right, self.mident):
+			return node.left
+
+	def _reduce_power(self, node):
+		if self._both_numbers(node.left, node.right):
+			value = node.left.value ** node.right.value
+			return ast.Num(Token(NUMBER, value))
+		elif (
+			self._is_equal_to(node.left, self.mident)
+			or self._is_equal_to(node.left, self.aident)
+		):
+			return node.left
+		elif self._is_equal_to(node.right, self.mident):
+			return node.left
+		elif self._is_equal_to(node.right, self.aident):
+			return ast.Num(Token(NUMBER, self.mident))
+
+	def _reduce_UnaryOp(self, node):
+		if node.op.type == PLUS:
+			return node.expr
+		elif node.op.type == MINUS:
+			if isinstance(node.expr, ast.UnaryOp):
+				if node.expr.op.type == MINUS:
+					setattr(node, 'op', Token(PLUS, '+'))
+					setattr(node, 'expr', node.expr.expr)
+				elif node.expr.op.type == PLUS:
+					setattr(node, 'expr', node.expr.expr)
+				return node
+
+	def visit_BinaryOp(self, node):
+		self.visit(node.left)
+		self.visit(node.right)
+
+		self._reduce_attr(node, 'left')
+		self._reduce_attr(node, 'right')
+			
+
+	def visit_UnaryOp(self, node):
+		self.visit(node.expr)
+		self._reduce_attr(node, 'expr')
+
+
+	def visit_Num(self, node):
+		pass
+
+	def visit_Var(self, node):
+		pass
+
+	def visit_Function(self, node):
+		self.visit(node.expr)
+		self._reduce_attr(node, 'expr')
+
+
+
+
+
 class NodeFinder(ABCVisitor):
 	"""
 	boolean AST walker that checks if a node type is present in a tree. To be
@@ -115,3 +276,18 @@ def is_constant(tree, wrt):
 	"""
 	checker = NodeFinder(tree)
 	return not checker.contains(wrt)
+
+
+def simplify(func):
+	""" 
+	decorator for class methods that return a PFunc instance. Uses the Reducer 
+	class to algebraically simplify the AST
+	"""
+
+	@functools.wraps(func)
+	def reduce(self=None, *args, **kwargs):
+		obj = func(self, *args, **kwargs)
+		red = Reducer(obj.tree)
+		return call.PFunc(tree=red.tree)
+
+	return reduce

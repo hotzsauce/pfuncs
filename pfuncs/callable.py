@@ -16,7 +16,11 @@ from pfuncs.operators import (
 	Curryer,
 	Differential
 )
-from pfuncs.utils import Writer, NodeFinder
+from pfuncs.utils import (
+	Writer,
+	simplify,
+	Reducer
+)
 
 class PFunc(object):
 	"""
@@ -50,7 +54,7 @@ class PFunc(object):
 		else:
 			msg = 'Exactly one of \'text\' and \'tree\' must be provided'
 			raise ValueError(msg)
-		
+
 	def _text_construct(self, text):
 		""" constructor method if 'text' parameter is passed to __init__ """
 		lexer = Lexer(text)
@@ -134,6 +138,7 @@ class PFunc(object):
 		interpreter = Interpreter(self.tree, self.scope)
 		return interpreter.interpret()
 
+	@simplify
 	def _curry(self):
 		return Curryer(
 			tree=self.tree,
