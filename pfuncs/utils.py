@@ -1,5 +1,5 @@
 """
-module for helpful AST-walkers
+module for helpful AST-walkers & functions that use them
 """
 import copy
 
@@ -20,7 +20,8 @@ class Writer(ABCVisitor):
 	"""
 
 	def __init__(self, tree):
-		self.tree = copy.deepcopy(tree)
+		super().__init__(tree)
+		# self.tree = copy.deepcopy(tree)
 
 	def add(self, new_string):
 		""" so you don't see 'self.text + self.text + x' all over """
@@ -60,3 +61,57 @@ class Writer(ABCVisitor):
 		self.text = ''
 		self.visit(self.tree)
 		return self.text
+
+
+class NodeFinder(ABCVisitor):
+	"""
+	boolean AST walker that checks if a node type is present in a tree. To be
+	specific, for each node class it checks the:
+		BinaryOp Node 	- operation
+		UnaryOp Node 	- operation
+		Num Node 		- value
+		Var Node 		- variable name
+		Function Node 	- function name
+	"""
+
+	def __init__(self, tree):
+		super().__init__(tree)
+		self.value = None
+		self.has_type = False
+
+	def contains(self, value):
+		self.has_type = False
+		self.value = value
+		self.visit(self.tree)
+		return self.has_type
+
+	def check_match(self, node_value):
+		if node_value == self.value:
+			self.has_type = True
+
+	def visit_BinaryOp(self, node):
+		self.check_match(node.op.value)
+		self.visit(node.left)
+		self.visit(node.right)
+
+	def visit_UnaryOp(self, node):
+		self.check_match(node.op.value)
+		self.visit(node.expr)
+
+	def visit_Num(self, node):
+		self.check_match(node.value)
+
+	def visit_Var(self, node):
+		self.check_match(node.value)
+
+	def visit_Function(self, node):
+		self.check_match(node.value)
+		self.visit(node.expr)
+
+
+def is_constant(tree, wrt):
+	"""
+	checks that an (full or partial) AST is constant with respect to some variable 
+	"""
+	checker = NodeFinder(tree)
+	return not checker.contains(wrt)

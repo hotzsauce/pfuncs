@@ -3,6 +3,7 @@ module for listing, parsing, and interpreting the built-in functions supported
 by pfuncs. Both Parser and Interpreter inherit most of the their functionality
 from the analogous objects in pfuncs.algebra
 """
+import copy
 import numpy as np
 from scipy.special import erf
 
@@ -166,3 +167,134 @@ class Interpreter(alg.Interpreter):
 
 		if f == ERF:
 			return erf(self.visit(node.expr))
+
+
+class FunctionDerivative(object):
+
+	def _copy(self, tree):
+		return copy.deepcopy(tree)
+
+	def function_derivative(self, node):
+		method = 'diff_' + node.value
+		fprime = getattr(self, method, self._notimplemented_diff)
+		return fprime(node)
+
+	def _notimplemented_diff(self, node):
+		msg = 'Derivative for {} not implemented.'
+		raise NotImplementedError(msg.format(repr(node.value)))
+
+	def diff_exp(self, node):
+		""" e^x -> e^x """
+		return self._copy(node)
+
+	def diff_log(self, node):
+		""" log(x) -> x^(-1) """
+		return ast.BinaryOp(
+			left=self._copy(node.expr),
+			op=Token(base.POWER, '**'),
+			right=ast.Num(Token(base.NUMBER, -1))
+		)
+
+	def diff_ln(self, node):
+		""" log(x) -> x^(-1) """
+		return self.diff_log(node)
+
+	def diff_log10(self, node):
+		""" log10(x) -> (x*ln(10))^(-1) """
+		denom = ast.BinaryOp(
+			left=self._copy(node.expr),
+			op=Token(base.MUL, '*'),
+			right=ast.Num(Token(base.NUMBER, np.log(10)))
+		)
+		return ast.BinaryOp(
+			left=denom,
+			op=Token(base.POWER, '**'),
+			right=ast.Num(Token(base.NUMBER, -1))
+		)
+
+	def diff_sqrt(self, node):
+		""" sqrt(x) -> (2*x^(1/2))^(-1) """
+		radical = ast.BinaryOp(
+			left=self._copy(node.expr),
+			op=Token(base.POWER, '**'),
+			right=ast.Num(Token(base.NUMBER, -1/2))
+		)
+		return ast.BinaryOp(
+			left=radical,
+			op=Token(base.DIV, '/'),
+			right=ast.Num(Token(base.NUMBER, 2))
+		)
+
+	def diff_sin(self, node):
+		""" cos(x) -> sin(x) """
+		return ast.Function(
+			token=Token(FUNCTION, COS),
+			expr=self._copy(node.expr)
+		)
+
+	def diff_cos(self, node):
+		""" cos(x) -> -sin(x) """
+		sine = ast.Function(
+			token=Token(FUNCTION, SIN),
+			expr=self._copy(node.expr)
+		)
+		return ast.UnaryOp(
+			op=Token(base.MINUS, '-'),
+			expr=sine
+		)
+
+	def diff_tan(self, node):
+		""" tan(x) -> (cos(x))^(-2) """
+		cosine = ast.Function(
+			token=Token(FUNCTION, COS),
+			expr=self._copy(node.expr)
+		)
+		return ast.BinaryOp(
+			left=cosine,
+			op=Token(base.POWER, '**'),
+			right=ast.Num(Token(base.NUMBER, -2))
+		)
+
+	def diff_asin(self, node):
+		""" asin(x) -> (1 - x^2)^(-1/2) """
+		xsq = ast.BinaryOp(
+			left=self._copy(node.expr),
+			op=Token(base.POWER, '**'),
+			right=ast.Num(Token(base.NUMBER, 2))
+		)
+		one_minus_xsq = ast.BinaryOp(
+			left=ast.Num(Token(base.NUMBER, 1)),
+			op=Token(base.MINUS, '-'),
+			right=xsq
+		)
+		return ast.BinaryOp(
+			left=one_minus_xsq,
+			op=Token(base.POWER, '**'),
+			right=ast.Num(Token(base.NUMBER, -1/2))
+		)
+
+	def diff_acos(self, node):
+		""" acos(x) -> -(1 - x^2)^(-1/2) """
+		radical = self.diff_asin(node)
+		return ast.UnaryOp(
+			op=Token(base.MINUS, '-'),
+			expr=radical
+		)
+
+	def diff_atan(self, node):
+		""" atan(x) -> (1 + x^2)^(-1) """
+		xsq = ast.BinaryOp(
+			left=self._copy(node.expr),
+			op=Token(base.POWER, '**'),
+			right=ast.Num(Token(base.NUMBER, 2))
+		)
+		one_plus_xsq = ast.BinaryOp(
+			left=ast.Num(Token(base.NUMBER, 1)),
+			op=Token(base.PLUS, '+'),
+			right=xsq
+		)
+		return ast.BinaryOp(
+			left=one_plus_xsq,
+			op=Token(base.POWER, '**'),
+			right=ast.Num(Token(base.NUMBER, -1))
+		)

@@ -19,6 +19,12 @@ must be used. Additionally, if only a subset of the variables are provided, then
 the PFunc is curried, and returns another PFunc instance as a function of the 
 non-provided variables (see Example 3 below).
 
+The analytic derivative of a PFunc instance is accessed via the `.derivative` (or 
+its alias `.d`) property. If _f_ is a function of _x_, _y_, and _z_, then `f.d['x']`
+returns a PFunc representing the derivative of _f_ with respect to _x_. Similarly,
+`f.d['x', 'y']` returns the derivative of _f_ with respect to both variables. If 
+you want to know the derivative of _g(x)_ at _x=4_, then use `g.d[{'x': 4}]`. 
+
 
 ### Examples ###
 1. Using the fixed point of <img src="https://render.githubusercontent.com/render/math?math=f(x) = 1 %2B 1/x"> to approximate the Golden Ratio
@@ -27,31 +33,31 @@ phi = pfuncs.PFunc('1/x + 1')
 p = 1
 for _ in range(30):
 		p = phi(p)
-print(p) 	# 1.6180339887496482
+print(p)    # 1.6180339887496482
 ```
 
 2. We can approximate Euler's constant _e_ using the first (historical) formula
 ```python
 euler = pfuncs.PFunc('(1 + 1/n)**n')
-print(euler(100))		# 2.704814
-print(euler(n=5000)) 	# 2.718010
+print(euler(100))       # 2.704814
+print(euler(n=5000))    # 2.718010
 ```
 The convergence of this formula is obviously very slow, so `pfuncs` recognizes 'e' as a special constants in expressions:
 ```python
-print(pfuncs.PFunc('e')) 	# 2.718281828459045
+print(pfuncs.PFunc('e'))  # 2.718281828459045
 ```
 
 3. Expressions with an arbitrary number of variables can also be translated to a function, provided the values are provided as keyword arguments when the function is called. Here we calculate the total payment on a 30-year mortgage, compounded monthly:
 ```python
 mortgage = pfuncs.PFunc('p*(1 + r/12)**(12 * 30)')
 principal, rate = 180000, 2/100
-print(mortgage(p=principal, r=rate)) 		# 327817.616263
+print(mortgage(p=principal, r=rate)) # 327817.616263
 rate = 4/100
 fixed_rate = mortgage(r=rate)
-print(type(fixed_rate)) 				  # <class 'pfuncs.callable.PFunc'>
-print(fixed_rate(p=195000)) 			  # 646132.112848
-print(fixed_rate(250000)) 				# 828374.5036517356
-print(mortgage(p=195000, r=rate)) 		# 646132.112848
+print(type(fixed_rate))              # <class 'pfuncs.callable.PFunc'>
+print(fixed_rate(p=195000))          # 646132.112848
+print(fixed_rate(250000))            # 828374.5036517356
+print(mortgage(p=195000, r=rate))    # 646132.112848
 ```
 
 
@@ -66,8 +72,9 @@ The following functions are recognized as built-in functions by `pfuncs`:
 * sine, _sin( )_
 * cosine, _cos( )_
 * tangent, _tan( )_
-* arcsine, _arcsin( )_
-* arccosine, _arccos( )_
+* arcsine, _asin( )_
+* arccosine, _acos( )_
+* arctangent, _atan()_
 * floor function, _floor( )_
 * ceiling function, _ceil( )_
 * integer function, _int( )_

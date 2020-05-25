@@ -12,8 +12,11 @@ from pfuncs.functions import (
 	Parser,
 	Interpreter
 )
-from pfuncs.curry import Curryer
-from pfuncs.utils import Writer
+from pfuncs.operators import (
+	Curryer,
+	Differential
+)
+from pfuncs.utils import Writer, NodeFinder
 
 class PFunc(object):
 	"""
@@ -132,16 +135,35 @@ class PFunc(object):
 		return interpreter.interpret()
 
 	def _curry(self):
-		""" if instance is multivariate and called with fewer than all variables, curry """
-		return PFunc(tree=Curryer(
-			tree=self.tree, 
-			scope=self.scope).curry()
-		)
+		return Curryer(
+			tree=self.tree,
+			scope=self.scope
+		).curry()
 
+	@property
+	def derivative(self):
+		return Differential(self.tree)
+
+	@property
+	def d(self):
+		""" alias for derivative property """
+		return self.derivative
+	
 	@property
 	def text(self):
 		author = Writer(self.tree)
 		return author.write()
+
+	def __str__(self):
+		return '<{klass}: {txt}, vars: {vars}>'.format(
+			klass=self.__class__.__name__,
+			txt=self.text,
+			vars=self.variables
+		)
+
+	def __repr__(self):
+		self.tree.describe()
+		return ''
 
 	def __call__(self, *args, **kwargs):
 		if len(self.variables) == 1:
