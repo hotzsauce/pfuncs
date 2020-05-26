@@ -220,6 +220,14 @@ class Func(object):
 	def __rpow__(self, other):
 		return utils.expo_funcs(other, self)
 
+	@utils.simplify
+	def __pos__(self):
+		return Func(self.text)
+
+	@utils.simplify
+	def __neg__(self):
+		return Func('-' + self.text)
+
 
 	def __str__(self):
 		return '<{klass}: {txt}, vars: {vars}>'.format(
