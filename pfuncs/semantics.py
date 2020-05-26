@@ -103,12 +103,12 @@ class ScopedMemory(object):
 		self.scope_level = scope_level
 
 	def assign(self, key, value):
-		# method used by pfunc callable, basically assigns the variable name
+		# method used by Func callable, basically assigns the variable name
 		#	and user-provided value to 'local memory'
 		self._variables[key] = value
 
 	def retrieve(self, key):
-		# method used by pfunc callable, retrieves assigned value by var name
+		# method used by Func callable, retrieves assigned value by var name
 		try:
 			return self._variables[key]
 		except KeyError:

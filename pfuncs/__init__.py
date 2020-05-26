@@ -1,5 +1,5 @@
 
-from pfuncs.callable import PFunc
+from pfuncs.callable import Func
 from pfuncs.lexer import Lexer 
 from pfuncs.functions import (
 	Parser,

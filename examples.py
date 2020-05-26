@@ -2,7 +2,7 @@
 import pfuncs as pf
 
 # the fixed point of f(x) = 1 + 1/x to approximate the Golden Ratio
-phi = pf.PFunc('1 + 1/x')
+phi = pf.Func('1 + 1/x')
 p = 1
 for _ in range(30):
 	p = phi(p)
@@ -10,7 +10,7 @@ print('The Golden Ratio is approximately: {phi}\n'.format(phi=p))
 
 
 # approximating Euler's constant e using the (historical) first formula for it:
-euler = pf.PFunc('(1 + 1/n)**n')
+euler = pf.Func('(1 + 1/n)**n')
 for n in [10, 50, 100, 500, 1000, 5000]:
 	print('After {n:>5} iterations, Euler\'s Constant is approximately {e:f}'.format(
 			n=n,
@@ -20,7 +20,7 @@ print(' ')
 
 
 # pfuncs does recognize 'e' as a special constant though:
-e_constant = pf.PFunc('e')
+e_constant = pf.Func('e')
 for i in range(0, 2):
 	print('Euler\'s Constant: {}'.format(e_constant(i)))
 print(' ')
@@ -30,7 +30,7 @@ print(' ')
 #	is called, kwargs must be used to avoid ambiguity.
 # As an example, we can calculate the final amount paid on a thirty year mortgage 
 # 	compounded monthly on a house that costs principal $p, with interest rate r
-mtg = pf.PFunc('p*(1 + r/12)**(12*30)')
+mtg = pf.Func('p*(1 + r/12)**(12*30)')
 for rate in range(2, 5):
 	for principal in range(150000, 210000, 15000):
 		amt = mtg(p=principal, r=rate/100)
@@ -41,12 +41,12 @@ for rate in range(2, 5):
 		)
 	print(' ')
 
-# The PFunc class supports currying. Just provide a subset of the variables used
-#	to initialize the first PFunc, and another PFunc with the remaining variables
+# The Func class supports currying. Just provide a subset of the variables used
+#	to initialize the first Func, and another Func with the remaining variables
 #	is returned. In this example, we calculate the shadow of a building h feet 
 #	high tilting at theta degrees. We also make use of the fact pfuncs recognizes
 #	pi as a special constant
-shadow = pf.PFunc('h*cos(pi*theta/180)')
+shadow = pf.Func('h*cos(pi*theta/180)')
 for h in [15, 30]:
 	fix_height = shadow(h=h)
 	for t in range(90, 75, -5):

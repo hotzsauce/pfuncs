@@ -1,5 +1,5 @@
 """
-module with Abstract Base Classes for parsers, and AST-climbing objects
+module with Abstract Base Classes for parsers, and AST-walking objects
 """
 
 class ABCParser(object):

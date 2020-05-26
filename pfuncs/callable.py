@@ -1,7 +1,8 @@
 """
-module defining the PFunc class - the central class of the pfuncs library
+module defining the Func class - the central class of the pfuncs library
 """
 
+import pfuncs.utils as utils
 
 from pfuncs.lexer import Lexer 
 from pfuncs.semantics import (
@@ -16,15 +17,11 @@ from pfuncs.operators import (
 	Curryer,
 	Differential
 )
-from pfuncs.utils import (
-	Writer,
-	simplify,
-	Reducer
-)
 
-class PFunc(object):
+
+class Func(object):
 	"""
-	PFunc class
+	Func class
 	=============================================================================
 	initialized two different ways:
 		1) with string of a mathematical expression (text parameter)
@@ -32,10 +29,10 @@ class PFunc(object):
 
 	attributes
 		tree 		- Abstract Syntax Tree representing the underlying expression 
-						of PFunc
+						of Func
 		variables 	- tuple of strings of the variables in underlying expression
 		scope 		- ScopedMemory object (dict-like) that holds the values of 
-						arguments each time an instance of PFunc is called
+						arguments each time an instance of Func is called
 		text 		- only assigned if instance is initialized with 'text'
 						parameter (for now)
 	"""
@@ -55,6 +52,10 @@ class PFunc(object):
 			msg = 'Exactly one of \'text\' and \'tree\' must be provided'
 			raise ValueError(msg)
 
+
+	# ============================== 
+	# 	Initialization Methods 
+	# ==============================
 	def _text_construct(self, text):
 		""" constructor method if 'text' parameter is passed to __init__ """
 		lexer = Lexer(text)
@@ -73,13 +74,51 @@ class PFunc(object):
 		sem_analyzer.analyze()
 		self.variables = sem_analyzer.variables
 
+	
+
+	# ==============================
+	# 	Calling Methods
+	# ==============================
+	def _call_univariate(self, *args, **kwargs):
+		""" if self.variables is 1-element tuple, init scope and evaluate """
+		if (len(args)==1) and (len(kwargs)==0):
+			self._init_scope(arguments=args)
+			return self._evaluate()
+		elif (len(args)==0) and (len(kwargs)==1):
+			self._init_scope(arguments=kwargs)
+			return self._evaluate()
+		else:
+			nargs = len(args) + len(kwargs)
+			msg = 'Expected one arguments; received {}'
+			raise ValueError(msg.format(nargs))
+
+	def _call_multivariate(self, *args, **kwargs):
+		""" 
+		if self.variables has more than one element. Must have kwargs provided. 
+		If there are fewer kwargs than self.variables, curry the underlying 
+		expression and return a new Func instance. If kwargs and variables are 
+		of equal length, evaluate 
+		"""
+		if args:
+			msg = 'Ambiguous arguments. For multivariate functions, use keywords'
+			raise ValueError(msg)
+		elif len(kwargs) < len(self.variables):
+			self._init_scope(arguments=kwargs)
+			return self._curry()
+		elif len(kwargs) == len(self.variables):
+			self._init_scope(arguments=kwargs)
+			return self._evaluate()
+		else:
+			msg = 'Expected one arguments; received {}'
+			raise ValueError(msg.format(len(kwargs)))
+
 	def _init_scope(self, arguments):
 		""" 
 		given 'arguments' object from one of the _call_* methods, initialize the 
 		'scope' parameter, and assign given values to the scope
 		"""
 		self.scope = ScopedMemory(
-			scope_name='pfunc', 
+			scope_name='global', 
 			scope_level=1
 		)
 		self._assign_scope(arguments)
@@ -100,53 +139,30 @@ class PFunc(object):
 		else:
 			raise TypeError('arguments must be dict or tuple')
 
-	def _call_univariate(self, *args, **kwargs):
-		""" if self.variables is 1-element tuple, init scope and evaluate """
-		if (len(args)==1) and (len(kwargs)==0):
-			self._init_scope(arguments=args)
-			return self._evaluate()
-		elif (len(args)==0) and (len(kwargs)==1):
-			self._init_scope(arguments=kwargs)
-			return self._evaluate()
-		else:
-			nargs = len(args) + len(kwargs)
-			msg = 'Expected one arguments; received {}'
-			raise ValueError(msg.format(nargs))
-
-	def _call_multivariate(self, *args, **kwargs):
-		""" 
-		if self.variables has more than one element. Must have kwargs provided. 
-		If there are fewer kwargs than self.variables, curry the underlying 
-		expression and return a new pfunc instance. If kwargs and variables are 
-		of equal length, evaluate 
-		"""
-		if args:
-			msg = 'Ambiguous arguments. For multivariate functions, use keywords'
-			raise ValueError(msg)
-		elif len(kwargs) < len(self.variables):
-			self._init_scope(arguments=kwargs)
-			return self._curry()
-		elif len(kwargs) == len(self.variables):
-			self._init_scope(arguments=kwargs)
-			return self._evaluate()
-		else:
-			msg = 'Expected one arguments; received {}'
-			raise ValueError(msg.format(len(kwargs)))
-
 	def _evaluate(self):
 		""" evaluates the expression given values of variables in self.scope """
 		interpreter = Interpreter(self.tree, self.scope)
 		return interpreter.interpret()
 
-	@simplify
+	@utils.simplify
 	def _curry(self):
 		return Curryer(
 			tree=self.tree,
 			scope=self.scope
 		).curry()
 
+
+
+	# ==============================
+	# 	Calculus Methods
+	# ==============================
 	@property
 	def derivative(self):
+		""" 
+		Differential class computes AST that represents the derivative, and
+		can be accessed with '[]' to compute functional derivatives, and the 
+		derivative at single points
+		"""
 		return Differential(self.tree)
 
 	@property
@@ -156,8 +172,54 @@ class PFunc(object):
 	
 	@property
 	def text(self):
-		author = Writer(self.tree)
+		author = utils.Writer(self.tree)
 		return author.write()
+
+
+
+	# ==============================
+	# 	Algebra Methods
+	# ==============================
+	@utils.simplify
+	def __add__(self, other):
+		return utils.sum_funcs(self, other)
+
+	@utils.simplify
+	def __radd__(self, other):
+		return utils.sum_funcs(other, self)
+
+	@utils.simplify
+	def __sub__(self, other):
+		return utils.diff_funcs(self, other)
+
+	@utils.simplify
+	def __rsub__(self, other):
+		return utils.diff_funcs(other, self)
+
+	@utils.simplify
+	def __mul__(self, other):
+		return utils.prod_funcs(self, other)
+
+	@utils.simplify
+	def __rmul__(self, other):
+		return utils.prod_funcs(other, self)
+
+	@utils.simplify
+	def __truediv__(self, other):
+		return utils.quot_funcs(self, other)
+
+	@utils.simplify
+	def __rtruediv__(self, other):
+		return utils.quot_funcs(other, self)
+
+	@utils.simplify
+	def __pow__(self, other):
+		return utils.expo_funcs(self, other)
+
+	@utils.simplify
+	def __rpow__(self, other):
+		return utils.expo_funcs(other, self)
+
 
 	def __str__(self):
 		return '<{klass}: {txt}, vars: {vars}>'.format(

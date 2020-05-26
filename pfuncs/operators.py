@@ -41,7 +41,7 @@ class Curryer(ABCVisitor):
 
 	def curry(self):
 		self.visit(self.tree)
-		return call.PFunc(tree=self.tree)
+		return call.Func(tree=self.tree)
 
 	def maybe_substitute(self, node, attr):
 		attribute = getattr(node, attr)
@@ -332,7 +332,7 @@ class _Jacobian(ABCVisitor, fnc.FunctionDerivative):
 
 class Differential(object):
 	"""
-	Class that's instantiated when the .d or .derivative property of a PFuncs
+	Class that's instantiated when the .d or .derivative property of a Funcs
 	instance is accessed
 	"""
 
@@ -343,19 +343,19 @@ class Differential(object):
 	def __getitem__(self, key):
 		if isinstance(key, str):
 			f_prime = _Jacobian(self.tree, key)
-			return call.PFunc(tree=f_prime.tree)
+			return call.Func(tree=f_prime.tree)
 
 		elif isinstance(key, tuple):
 			tree = copy.deepcopy(self.tree)
 			for k in reversed(key):
 				dfdk = _Jacobian(tree, k)
 				tree = dfdk.tree
-			return call.PFunc(tree=tree)
+			return call.Func(tree=tree)
 
 		elif isinstance(key, dict):
 			tree = copy.deepcopy(self.tree)
 			for k in reversed(tuple(key.keys())):
 				dfdk = _Jacobian(tree, k)
 				tree = dfdk.tree
-			f_prime = call.PFunc(tree=tree)
+			f_prime = call.Func(tree=tree)
 			return f_prime(**key)

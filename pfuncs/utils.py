@@ -221,9 +221,6 @@ class Reducer(ABCVisitor):
 		self._reduce_attr(node, 'expr')
 
 
-
-
-
 class NodeFinder(ABCVisitor):
 	"""
 	boolean AST walker that checks if a node type is present in a tree. To be
@@ -280,7 +277,7 @@ def is_constant(tree, wrt):
 
 def simplify(func):
 	""" 
-	decorator for class methods that return a PFunc instance. Uses the Reducer 
+	decorator for class methods that return a Func instance. Uses the Reducer 
 	class to algebraically simplify the AST
 	"""
 
@@ -288,6 +285,77 @@ def simplify(func):
 	def reduce(self=None, *args, **kwargs):
 		obj = func(self, *args, **kwargs)
 		red = Reducer(obj.tree)
-		return call.PFunc(tree=red.tree)
+		return call.Func(tree=red.tree)
 
 	return reduce
+
+
+def ensure_func(f):
+	if isinstance(f, call.Func):
+		return f 
+	elif isinstance(f, str):
+		return call.Func(f)
+	elif isinstance(f, (int, tuple)):
+		return call.Func(str(f))
+	else:
+		raise TypeError(repr(f))
+
+def sum_funcs(f, g):
+
+	f = ensure_func(f)
+	g = ensure_func(g)
+
+	fg = ast.BinaryOp(
+		left=f.tree,
+		op=Token(PLUS, '+'),
+		right=g.tree
+	)
+	return call.Func(tree=fg)
+
+def diff_funcs(f, g):
+	
+	f = ensure_func(f)
+	g = ensure_func(g)
+
+	fg = ast.BinaryOp(
+		left=f.tree,
+		op=Token(MINUS, '-'),
+		right=g.tree
+	)
+	return call.Func(tree=fg)
+
+def prod_funcs(f, g):
+
+	f = ensure_func(f)
+	g = ensure_func(g)
+
+	fg = ast.BinaryOp(
+		left=f.tree,
+		op=Token(MUL, '*'),
+		right=g.tree
+	)
+	return call.Func(tree=fg)
+
+def quot_funcs(f, g):
+	
+	f = ensure_func(f)
+	g = ensure_func(g)
+
+	fg = ast.BinaryOp(
+		left=f.tree,
+		op=Token(DIV, '/'),
+		right=g.tree
+	)
+	return call.Func(tree=fg)
+
+def expo_funcs(f, g):
+
+	f = ensure_func(f)
+	g = ensure_func(g)
+
+	fg = ast.BinaryOp(
+		left=f.tree,
+		op=Token(POWER, '**'),
+		right=g.tree
+	)
+	return call.Func(tree=fg)
