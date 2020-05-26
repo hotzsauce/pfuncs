@@ -295,7 +295,7 @@ def ensure_func(f):
 		return f 
 	elif isinstance(f, str):
 		return call.Func(f)
-	elif isinstance(f, (int, tuple)):
+	elif isinstance(f, (int, float)):
 		return call.Func(str(f))
 	else:
 		raise TypeError(repr(f))
