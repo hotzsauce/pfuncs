@@ -31,7 +31,7 @@ non-provided variables (see Example 3 below).
 
 In all calling situations - simple evaluation, currying, and differentiation - the arguments
 can be ints or floats, parse-able string expressions, or Func instances. In the latter two 
-cases, the composition of the functions is returned. Arugments of `numpy.ndarray` type are 
+cases, the composition of the functions is returned. Arguments of `numpy.ndarray` type are 
 also handled in most cases, but because `pfuncs` wasn't designed with matrix operations in 
 mind, errors may arise.
 
