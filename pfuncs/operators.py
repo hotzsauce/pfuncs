@@ -31,8 +31,7 @@ class Curryer(ABCVisitor):
 	"""
 	class that implements currying of multivariate functions. Walks over the 
 	entire Abstract Syntax Tree, and every time it hits a Var node that 
-	represents a variable in the scope, replaces it with a Num node with
-	the provided value
+	represents a variable in the scope, replaces it with the argument
 	"""
 
 	def __init__(self, tree, scope):
@@ -50,21 +49,32 @@ class Curryer(ABCVisitor):
 				setattr(node, attr, self.substitute(attribute))
 
 	def substitute(self, node):
+		""" 
+		four cases for substituting: Func obj, or parse-able string, 
+		number or ndarray-type object 
+		"""
 		var_name = node.value 
 		var_value = self.scope.retrieve(var_name)
-		token = Token(NUMBER, var_value)
-		return ast.Num(token)
+
+		if isinstance(var_value, call.Func):
+			return var_value.tree
+		elif isinstance(var_value, str):
+			sub_func = call.Func(var_value)
+			return sub_func.tree
+		else:
+			token = Token(NUMBER, var_value)
+			return ast.Num(token)
 
 	def visit_BinaryOp(self, node):
-		self.maybe_substitute(node, 'left')
-		self.maybe_substitute(node, 'right')
 		self.visit(node.left)
 		self.visit(node.right)
-
+		self.maybe_substitute(node, 'left')
+		self.maybe_substitute(node, 'right')
+		
 	def visit_UnaryOp(self, node):
-		self.maybe_substitute(node, 'expr')
 		self.visit(node.expr)
-
+		self.maybe_substitute(node, 'expr')
+		
 	def visit_Num(self, node):
 		pass
 
