@@ -31,7 +31,6 @@ ACOS 	= 'acos'
 ATAN 	= 'atan'
 FLOOR  	= 'floor'
 CEIL 	= 'ceil'
-INT 	= 'int'
 MAX 	= 'max'
 MIN 	= 'min'
 NORMCDF = 'normcdf'
@@ -55,7 +54,6 @@ RESERVED_KEYWORDS = {
 	ATAN: 		Token(FUNCTION, ATAN),
 	FLOOR: 		Token(FUNCTION, FLOOR),
 	CEIL:		Token(FUNCTION, CEIL),
-	INT: 		Token(FUNCTION, INT),
 	MAX: 		Token(FUNCTION, MAX),
 	MIN: 		Token(FUNCTION, MIN),
 	NORMCDF: 	Token(FUNCTION, NORMCDF),
@@ -225,6 +223,18 @@ class FunctionDerivative(object):
 			right=ast.Num(Token(base.NUMBER, 2))
 		)
 
+	def diff_abs(self, node):
+		""" abs(x) -> sign(x) """
+		return ast.Function(
+			token=Token(FUNCTION, SIGN),
+			expr=self._copy(node.expr)
+		)
+
+	def diff_sign(self, node):
+		""" sign(x) -> 0 , ignoring undefined value at 0 """
+		return ast.Num(Token(base.NUMBER, 0))
+
+
 	def diff_sin(self, node):
 		""" cos(x) -> sin(x) """
 		return ast.Function(
@@ -297,4 +307,43 @@ class FunctionDerivative(object):
 			left=one_plus_xsq,
 			op=Token(base.POWER, '**'),
 			right=ast.Num(Token(base.NUMBER, -1))
+		)
+
+	def diff_floor(self, node):
+		""" floor(x) -> 0, ignoring discontinuities where x is integer """
+		return ast.Num(Token(base.NUMBER, 0))
+
+	def diff_ceil(self, node):
+		""" ceil(x) -> 0, ignoring discontinuities where x is integer """
+		return ast.Num(Token(base.NUMBER, 0))
+
+	def diff_erf(self, node):
+		""" erf(x) -> (2/sqrt(pi))*exp(-x^2) """
+		sqrtpi = ast.Function(
+			token=Token(FUNCTION, SQRT),
+			expr=ast.Num(Token(base.NUMBER, np.pi))
+		)
+		twopi = ast.BinaryOp(
+			left=ast.Num(Token(base.NUMBER, 2)),
+			op=Token(base.DIV, '/'),
+			right=sqrtpi
+		)
+
+		xsq = ast.BinaryOp(
+			left=self._copy(node.expr),
+			op=Token(base.POWER, '**'),
+			right=ast.Num(Token(base.NUMBER, 2))
+		)
+		nxsq = ast.UnaryOp(
+			op=Token(base.MINUS, '-'),
+			expr=xsq
+		)
+		exp = ast.Function(
+			token=Token(FUNCTION, EXP),
+			expr=nxsq
+		)
+		return ast.BinaryOp(
+			left=twopi,
+			op=Token(base.MUL, '*'),
+			right=exp
 		)
