@@ -2,8 +2,11 @@
 module defining the Func class - the central class of the pfuncs library
 """
 
+import pfuncs.ast as ast
+import pfuncs.base as base
 import pfuncs.utils as utils
 
+from pfuncs.tokens import Token
 from pfuncs.lexer import Lexer 
 from pfuncs.semantics import (
 	SemanticAnalyzer,
@@ -178,47 +181,87 @@ class Func(object):
 
 
 	# ==============================
-	# 	Algebra Methods
+	# 	Algebraic Methods
 	# ==============================
 	@utils.simplify
 	def __add__(self, other):
-		return utils.sum_funcs(self, other)
+		f = utils.ensure_func(self)
+		g = utils.ensure_func(other)
+
+		fg = ast.BinaryOp(
+			left=f.tree,
+			op=Token(base.PLUS, '+'),
+			right=g.tree
+		)
+		return Func(tree=fg)
 
 	@utils.simplify
 	def __radd__(self, other):
-		return utils.sum_funcs(other, self)
+		return __add__(other, self)
 
 	@utils.simplify
 	def __sub__(self, other):
-		return utils.diff_funcs(self, other)
+		f = utils.ensure_func(self)
+		g = utils.ensure_func(other)
+
+		fg = ast.BinaryOp(
+			left=f.tree,
+			op=Token(base.MINUS, '-'),
+			right=g.tree
+		)
+		return Func(tree=fg)
 
 	@utils.simplify
 	def __rsub__(self, other):
-		return utils.diff_funcs(other, self)
+		return __sub__(other, self)
 
 	@utils.simplify
 	def __mul__(self, other):
-		return utils.prod_funcs(self, other)
+		f = utils.ensure_func(self)
+		g = utils.ensure_func(other)
+		
+		fg = ast.BinaryOp(
+			left=f.tree,
+			op=Token(base.MUL, '*'),
+			right=g.tree
+		)
+		return Func(tree=fg)
 
 	@utils.simplify
 	def __rmul__(self, other):
-		return utils.prod_funcs(other, self)
+		return __mul__(other, self)
 
 	@utils.simplify
 	def __truediv__(self, other):
-		return utils.quot_funcs(self, other)
+		f = utils.ensure_func(self)
+		g = utils.ensure_func(other)
+		
+		fg = ast.BinaryOp(
+			left=f.tree,
+			op=Token(base.DIV, '/'),
+			right=g.tree
+		)
+		return Func(tree=fg)
 
 	@utils.simplify
 	def __rtruediv__(self, other):
-		return utils.quot_funcs(other, self)
+		return __truediv__(other, self)
 
 	@utils.simplify
 	def __pow__(self, other):
-		return utils.expo_funcs(self, other)
+		f = utils.ensure_func(self)
+		g = utils.ensure_func(other)
+		
+		fg = ast.BinaryOp(
+			left=f.tree,
+			op=Token(base.POWER, '**'),
+			right=g.tree
+		)
+		return Func(tree=fg)
 
 	@utils.simplify
 	def __rpow__(self, other):
-		return utils.expo_funcs(other, self)
+		return __pow__(other, self)
 
 	@utils.simplify
 	def __pos__(self):
@@ -227,7 +270,6 @@ class Func(object):
 	@utils.simplify
 	def __neg__(self):
 		return Func('-' + self.text)
-
 
 	def __str__(self):
 		return '<{klass}: {txt}, vars: {vars}>'.format(

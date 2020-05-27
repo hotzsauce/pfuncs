@@ -284,8 +284,13 @@ def simplify(func):
 	@functools.wraps(func)
 	def reduce(self=None, *args, **kwargs):
 		obj = func(self, *args, **kwargs)
-		red = Reducer(obj.tree)
-		return call.Func(tree=red.tree)
+		try:
+			red = Reducer(obj.tree)
+			return call.Func(tree=red.tree)
+		except AttributeError:
+			# if func() is an fully evaluated Differential object, 'obj' will
+			#	just be a number
+			return call.Func(str(obj))
 
 	return reduce
 
@@ -299,63 +304,3 @@ def ensure_func(f):
 		return call.Func(str(f))
 	else:
 		raise TypeError(repr(f))
-
-def sum_funcs(f, g):
-
-	f = ensure_func(f)
-	g = ensure_func(g)
-
-	fg = ast.BinaryOp(
-		left=f.tree,
-		op=Token(PLUS, '+'),
-		right=g.tree
-	)
-	return call.Func(tree=fg)
-
-def diff_funcs(f, g):
-	
-	f = ensure_func(f)
-	g = ensure_func(g)
-
-	fg = ast.BinaryOp(
-		left=f.tree,
-		op=Token(MINUS, '-'),
-		right=g.tree
-	)
-	return call.Func(tree=fg)
-
-def prod_funcs(f, g):
-
-	f = ensure_func(f)
-	g = ensure_func(g)
-
-	fg = ast.BinaryOp(
-		left=f.tree,
-		op=Token(MUL, '*'),
-		right=g.tree
-	)
-	return call.Func(tree=fg)
-
-def quot_funcs(f, g):
-	
-	f = ensure_func(f)
-	g = ensure_func(g)
-
-	fg = ast.BinaryOp(
-		left=f.tree,
-		op=Token(DIV, '/'),
-		right=g.tree
-	)
-	return call.Func(tree=fg)
-
-def expo_funcs(f, g):
-
-	f = ensure_func(f)
-	g = ensure_func(g)
-
-	fg = ast.BinaryOp(
-		left=f.tree,
-		op=Token(POWER, '**'),
-		right=g.tree
-	)
-	return call.Func(tree=fg)
