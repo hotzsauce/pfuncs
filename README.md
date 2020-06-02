@@ -74,6 +74,7 @@ print(mortgage(p=195000, r=rate))    # 646132.112848
 
 ### Built-in Functions ###
 The following functions are recognized as built-in functions by `pfuncs`:
+
 |    function    |      builtin name       | |   function  |       builtin name      |
 |:---------------|------------------------:| |:------------|------------------------:|
 |       e^x      |         _exp( )_        | | natural log |    _log( )_ or _ln( )_  |
