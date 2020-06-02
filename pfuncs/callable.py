@@ -78,7 +78,6 @@ class Func(object):
 		self.variables = sem_analyzer.variables
 
 	
-
 	# ==============================
 	# 	Calling Methods
 	# ==============================
@@ -86,10 +85,10 @@ class Func(object):
 		""" if self.variables is 1-element tuple, init scope and evaluate """
 		if (len(args)==1) and (len(kwargs)==0):
 			self._init_scope(arguments=args)
-			return self._evaluate()
+			return self._maybe_evaluate()
 		elif (len(args)==0) and (len(kwargs)==1):
 			self._init_scope(arguments=kwargs)
-			return self._evaluate()
+			return self._maybe_evaluate()
 		else:
 			nargs = len(args) + len(kwargs)
 			msg = 'Expected one arguments; received {}'
@@ -110,7 +109,7 @@ class Func(object):
 			return self._curry()
 		elif len(kwargs) == len(self.variables):
 			self._init_scope(arguments=kwargs)
-			return self._evaluate()
+			return self._maybe_evaluate()
 		else:
 			msg = 'Expected one arguments; received {}'
 			raise ValueError(msg.format(len(kwargs)))
@@ -142,6 +141,16 @@ class Func(object):
 		else:
 			raise TypeError('arguments must be dict or tuple')
 
+	def _maybe_evaluate(self):
+		""" 
+		substitute variables if they're parsable strings or Funcs, 
+		otherwise, evaluate 
+		"""
+		if any([utils.is_str_or_func(arg) for arg in self.scope.arguments]):
+			return self._curry()
+		else:
+			return self._evaluate()
+
 	def _evaluate(self):
 		""" evaluates the expression given values of variables in self.scope """
 		interpreter = Interpreter(self.tree, self.scope)
@@ -153,7 +162,6 @@ class Func(object):
 			tree=self.tree,
 			scope=self.scope
 		).curry()
-
 
 
 	# ==============================
@@ -177,7 +185,6 @@ class Func(object):
 	def text(self):
 		author = utils.Writer(self.tree)
 		return author.write()
-
 
 
 	# ==============================

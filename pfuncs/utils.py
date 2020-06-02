@@ -293,8 +293,6 @@ class NodeFinder(ABCVisitor):
 		self.visit(arg.expr)
 
 
-
-
 def is_constant(tree, wrt):
 	"""
 	checks that an (full or partial) AST is constant with respect to some variable 
@@ -333,11 +331,16 @@ def ensure_func(f):
 	else:
 		raise TypeError(repr(f))
 
+def is_str_or_func(f):
+	if isinstance(f, (call.Func, str)):
+		return True
+	else:
+		return False
 
 """ utility functions that make adding nodes to trees quicker """
 def number(value):
 	return ast.Num(Token(NUMBER, value))
-	
+
 def add(left, right):
 	return ast.BinaryOp(
 		left=left,

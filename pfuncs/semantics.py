@@ -118,6 +118,10 @@ class ScopedMemory(object):
 	def variables(self):
 		return list(self._variables.keys())
 
+	@property
+	def arguments(self):
+		return list(self._variables.values())
+
 
 class SemanticAnalyzer(ABCVisitor):
 
