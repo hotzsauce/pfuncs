@@ -118,6 +118,10 @@ class Lexer(object):
 				self.advance()
 				return Token(base.RPARE, ')')
 
+			if self.current_char == ',':
+				self.advance()
+				return Token(base.COMMA, ',')
+
 			if self.current_char is not None:
 				self.error(self.current_char)
 

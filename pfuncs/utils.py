@@ -64,6 +64,18 @@ class Writer(ABCVisitor):
 		self.visit(node.expr)
 		self.add(')')
 
+	def visit_MultivarFunction(self, node):
+		self.add(node.value)
+		self.add('(')
+		self.visit(node.arguments[0])
+		for arg in node.arguments[1:]:
+			self.add(', ')
+			self.visit(arg)
+		self.add(')')
+
+	def visit_Arg(self, node):
+		self.visit(node.expr)
+
 	def write(self):
 		self.text = ''
 		self.visit(self.tree)
@@ -220,6 +232,10 @@ class Reducer(ABCVisitor):
 		self.visit(node.expr)
 		self._reduce_attr(node, 'expr')
 
+	def visit_MultivarFunction(self, node):
+		for arg in node.arguments:
+			self._reduce_attr(arg, 'expr')
+
 
 class NodeFinder(ABCVisitor):
 	"""
@@ -266,6 +282,16 @@ class NodeFinder(ABCVisitor):
 		self.check_match(node.value)
 		self.visit(node.expr)
 
+	def visit_MultivarFunction(self, node):
+		self.check_match(node.value)
+		for arg in node.arguments:
+			self.visit(arg)
+
+	def visit_Arg(self, node):
+		self.visit(arg.expr)
+
+
+
 
 def is_constant(tree, wrt):
 	"""
@@ -290,7 +316,7 @@ def simplify(func):
 		except AttributeError:
 			# if func() is an fully evaluated Differential object, 'obj' will
 			#	just be a number
-			return call.Func(str(obj))
+			return obj
 
 	return reduce
 

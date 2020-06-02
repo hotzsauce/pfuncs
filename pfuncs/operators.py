@@ -85,6 +85,14 @@ class Curryer(ABCVisitor):
 		self.maybe_substitute(node, 'expr')
 		self.visit(node.expr)
 
+	def visit_MultivarFunction(self, node):
+		for arg in node.arguments:
+			self.maybe_substitute(arg, 'expr')
+			self.visit(arg)
+			
+	def visit_Arg(self, node):
+		self.visit(node.expr)
+
 
 class _Jacobian(ABCVisitor, fnc.FunctionDerivative):
 	"""
@@ -120,6 +128,8 @@ class _Jacobian(ABCVisitor, fnc.FunctionDerivative):
 			setattr(node, attr, ast.Num(Token(NUMBER, 0)))
 		elif isinstance(attribute, ast.Function):
 			setattr(node, attr, self._chain_rule(attribute))
+		elif isinstance(attribute, ast.MultivarFunction):
+			raise NotImplementedError
 		else:
 			self.visit(attribute)
 
@@ -338,6 +348,14 @@ class _Jacobian(ABCVisitor, fnc.FunctionDerivative):
 		functions within binary & unary operations, and expressions
 		"""
 		self.tree = self._chain_rule(node)
+
+	def visit_MultivarFunction(self, node):
+		""" 
+		if this node is reached it means the entire tree is just the one 
+		multivarvunction node. In larger trees, the maybe_singleton method handles
+		multivarfunctions within binary & unary operations, and expressions
+		"""
+		raise NotImplementedError
 
 
 class Differential(object):

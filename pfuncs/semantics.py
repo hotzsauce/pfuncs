@@ -151,6 +151,13 @@ class SemanticAnalyzer(ABCVisitor):
 	def visit_Function(self, node):
 		self.visit(node.expr)
 
+	def visit_MultivarFunction(self, node):
+		for arg in node.arguments:
+			self.visit(arg)
+
+	def visit_Arg(self, node):
+		self.visit(node.expr)
+
 	def analyze(self):
 		self.visit(self.tree)
 

@@ -78,3 +78,16 @@ class Function(AST):
 		self.token = token
 		self.value = self.token.value
 		self.expr = expr
+
+
+class MultivarFunction(AST):
+
+	def __init__(self, token, arguments):
+		self.token = token
+		self.value = self.token.value
+		self.arguments = arguments
+
+
+class Arg(AST):
+	def __init__(self, expr):
+		self.expr = expr

@@ -5,6 +5,7 @@ from the analogous objects in pfuncs.algebra
 """
 import copy
 import numpy as np
+import scipy.stats as stats
 from scipy.special import erf
 
 import pfuncs.ast as ast 
@@ -61,6 +62,15 @@ RESERVED_KEYWORDS = {
 	ERF: 		Token(FUNCTION, ERF)
 }
 
+# dictioanry of function_name: max number of args
+#	-1 means there is no limit
+MULTIVAR_FUNCTIONS = {
+	MAX: -1,
+	MIN: -1, 
+	NORMCDF: 3,
+	NORMPDF: 3
+}
+
 
 class Parser(alg.Parser):
 	""" 
@@ -71,17 +81,56 @@ class Parser(alg.Parser):
 	def __init__(self, lexer):
 		super().__init__(lexer)
 
+	def multivar_call(self):
+		token = self.current_token
+		self.eat(FUNCTION)
+		self.eat(base.LPARE)
+
+		# first argument is required
+		args = [ast.Arg(self.expr())]
+		
+		max_arg = MULTIVAR_FUNCTIONS[token.value]
+		arg_idx = 1
+		while self.current_token.type == base.COMMA:
+			arg_idx += 1
+			if (max_arg > 0) and (arg_idx > max_arg):
+				msg = '{fname} only accepts {n} arguments.'
+				raise SyntaxError(msg.format(
+						fname=repr(token.value),
+						n=max_arg
+					)
+				)
+			self.eat(base.COMMA)
+			args.append(ast.Arg(self.expr()))
+
+		self.eat(base.RPARE)
+		
+		return ast.MultivarFunction(
+			token=token,
+			arguments=args
+		)
+		
+	def univar_call(self):
+		token = self.current_token
+		self.eat(FUNCTION)
+		self.eat(base.LPARE)
+
+		node = ast.Function(
+			token=token,
+			expr=self.expr()
+		)
+		self.eat(base.RPARE)
+
+		return node
+
 	def call(self):
 		node = self.atom()
 
 		while self.current_token.type == FUNCTION:
-			token = self.current_token
-			self.eat(FUNCTION)
-			self.eat(base.LPARE)
-
-			node = ast.Function(token=token,
-								expr=self.expr())
-			self.eat(base.RPARE)
+			if self.current_token.value in MULTIVAR_FUNCTIONS:
+				node = self.multivar_call()
+			else:
+				node = self.univar_call()
 
 		return node
 
@@ -92,9 +141,11 @@ class Parser(alg.Parser):
 			token = self.current_token
 			self.eat(base.POWER)
 
-			node = ast.BinaryOp(left=node,
-								op=token,
-								right=self.exponent())
+			node = ast.BinaryOp(
+				left=node,
+				op=token,
+				right=self.exponent()
+			)
 		return node
 
 
@@ -151,20 +202,36 @@ class Interpreter(alg.Interpreter):
 		if f == INT:
 			return int(self.visit(node.expr))
 
-		if f == MAX:
-			raise NotImplementedError(MAX)
-
-		if f == MIN:
-			raise NotImplementedError(MIN)	
-
-		if f == NORMCDF:
-			raise NotImplementedError(NORMCDF)
-
-		if f == NORMPDF:
-			raise NotImplementedError(NORMPDF)	
-
 		if f == ERF:
 			return erf(self.visit(node.expr))
+
+
+	def visit_MultivarFunction(self, node):
+		f = node.value
+		args = node.arguments
+
+		if f == MAX:
+			return np.amax([self.visit(arg) for arg in args])
+
+		if f == MIN:
+			return np.amin([self.visit(arg) for arg in args])
+
+		if f == NORMCDF:
+			return stats.norm.cdf(
+				self.visit(args[0]),
+				self.visit(args[1]),
+				self.visit(args[2])
+			)
+
+		if f == NORMPDF:
+			return stats.norm.pdf(
+				self.visit(args[0]),
+				self.visit(args[1]),
+				self.visit(args[2])
+			)
+
+	def visit_Arg(self, node):
+		return self.visit(node.expr)
 
 
 class FunctionDerivative(object):
