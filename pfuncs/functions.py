@@ -10,6 +10,7 @@ from scipy.special import erf
 
 import pfuncs.ast as ast 
 import pfuncs.base as base
+import pfuncs.utils as utils
 import pfuncs.algebra as alg
 
 from pfuncs.tokens import Token 
@@ -251,10 +252,9 @@ class FunctionDerivative(object):
 
 	def diff_log(self, node):
 		""" log(x) -> x^(-1) """
-		return ast.BinaryOp(
+		return utils.power(
 			left=self._copy(node.expr),
-			op=Token(base.POWER, '**'),
-			right=ast.Num(Token(base.NUMBER, -1))
+			right=utils.number(-1)
 		)
 
 	def diff_ln(self, node):
@@ -263,28 +263,24 @@ class FunctionDerivative(object):
 
 	def diff_log10(self, node):
 		""" log10(x) -> (x*ln(10))^(-1) """
-		denom = ast.BinaryOp(
+		denom = utils.mul(
 			left=self._copy(node.expr),
-			op=Token(base.MUL, '*'),
-			right=ast.Num(Token(base.NUMBER, np.log(10)))
+			right=utils.number(np.log(10))
 		)
-		return ast.BinaryOp(
+		return utils.power(
 			left=denom,
-			op=Token(base.POWER, '**'),
-			right=ast.Num(Token(base.NUMBER, -1))
+			right=utils.number(-1)
 		)
 
 	def diff_sqrt(self, node):
 		""" sqrt(x) -> (2*x^(1/2))^(-1) """
-		radical = ast.BinaryOp(
+		radical = utils.power(
 			left=self._copy(node.expr),
-			op=Token(base.POWER, '**'),
-			right=ast.Num(Token(base.NUMBER, -1/2))
+			right=utils.number(-1/2)
 		)
-		return ast.BinaryOp(
+		return utils.div(
 			left=radical,
-			op=Token(base.DIV, '/'),
-			right=ast.Num(Token(base.NUMBER, 2))
+			right=utils.number(2)
 		)
 
 	def diff_abs(self, node):
@@ -296,8 +292,7 @@ class FunctionDerivative(object):
 
 	def diff_sign(self, node):
 		""" sign(x) -> 0 , ignoring undefined value at 0 """
-		return ast.Num(Token(base.NUMBER, 0))
-
+		return utils.number(0)
 
 	def diff_sin(self, node):
 		""" cos(x) -> sin(x) """
@@ -323,28 +318,24 @@ class FunctionDerivative(object):
 			token=Token(FUNCTION, COS),
 			expr=self._copy(node.expr)
 		)
-		return ast.BinaryOp(
+		return utils.power(
 			left=cosine,
-			op=Token(base.POWER, '**'),
-			right=ast.Num(Token(base.NUMBER, -2))
+			right=utils.number(-2)
 		)
 
 	def diff_asin(self, node):
 		""" asin(x) -> (1 - x^2)^(-1/2) """
-		xsq = ast.BinaryOp(
+		xsq = utils.power(
 			left=self._copy(node.expr),
-			op=Token(base.POWER, '**'),
-			right=ast.Num(Token(base.NUMBER, 2))
+			right=utils.number(2)
 		)
-		one_minus_xsq = ast.BinaryOp(
-			left=ast.Num(Token(base.NUMBER, 1)),
-			op=Token(base.MINUS, '-'),
+		one_minus_xsq = utils.minus(
+			left=utils.number(1),
 			right=xsq
 		)
-		return ast.BinaryOp(
+		return utils.power(
 			left=one_minus_xsq,
-			op=Token(base.POWER, '**'),
-			right=ast.Num(Token(base.NUMBER, -1/2))
+			right=utils.number(-1/2)
 		)
 
 	def diff_acos(self, node):
@@ -357,29 +348,26 @@ class FunctionDerivative(object):
 
 	def diff_atan(self, node):
 		""" atan(x) -> (1 + x^2)^(-1) """
-		xsq = ast.BinaryOp(
+		xsq = utils.power(
 			left=self._copy(node.expr),
-			op=Token(base.POWER, '**'),
-			right=ast.Num(Token(base.NUMBER, 2))
+			right=utils.number(2)
 		)
-		one_plus_xsq = ast.BinaryOp(
-			left=ast.Num(Token(base.NUMBER, 1)),
-			op=Token(base.PLUS, '+'),
+		one_plus_xsq = utils.add(
+			left=utils.number(1),
 			right=xsq
 		)
-		return ast.BinaryOp(
+		return utils.power(
 			left=one_plus_xsq,
-			op=Token(base.POWER, '**'),
-			right=ast.Num(Token(base.NUMBER, -1))
+			right=utils.number(-1)
 		)
 
 	def diff_floor(self, node):
 		""" floor(x) -> 0, ignoring discontinuities where x is integer """
-		return ast.Num(Token(base.NUMBER, 0))
+		return utils.number(0)
 
 	def diff_ceil(self, node):
 		""" ceil(x) -> 0, ignoring discontinuities where x is integer """
-		return ast.Num(Token(base.NUMBER, 0))
+		return utils.number(0)
 
 	def diff_erf(self, node):
 		""" erf(x) -> (2/sqrt(pi))*exp(-x^2) """
@@ -387,16 +375,14 @@ class FunctionDerivative(object):
 			token=Token(FUNCTION, SQRT),
 			expr=ast.Num(Token(base.NUMBER, np.pi))
 		)
-		twopi = ast.BinaryOp(
-			left=ast.Num(Token(base.NUMBER, 2)),
-			op=Token(base.DIV, '/'),
+		twopi = utils.div(
+			left=utils.number(2),
 			right=sqrtpi
 		)
 
-		xsq = ast.BinaryOp(
+		xsq = utils.power(
 			left=self._copy(node.expr),
-			op=Token(base.POWER, '**'),
-			right=ast.Num(Token(base.NUMBER, 2))
+			right=utils.number(2)
 		)
 		nxsq = ast.UnaryOp(
 			op=Token(base.MINUS, '-'),
@@ -406,8 +392,7 @@ class FunctionDerivative(object):
 			token=Token(FUNCTION, EXP),
 			expr=nxsq
 		)
-		return ast.BinaryOp(
+		return utils.mul(
 			left=twopi,
-			op=Token(base.MUL, '*'),
 			right=exp
 		)

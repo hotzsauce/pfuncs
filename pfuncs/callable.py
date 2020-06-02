@@ -187,81 +187,61 @@ class Func(object):
 	def __add__(self, other):
 		f = utils.ensure_func(self)
 		g = utils.ensure_func(other)
-
-		fg = ast.BinaryOp(
-			left=f.tree,
-			op=Token(base.PLUS, '+'),
-			right=g.tree
-		)
-		return Func(tree=fg)
+		return Func(tree=utils.add(f.tree, g.tree))
 
 	@utils.simplify
 	def __radd__(self, other):
-		return __add__(other, self)
+		f = utils.ensure_func(other)
+		g = utils.ensure_func(self)
+		return Func(tree=utils.add(f.tree, g.tree))
 
 	@utils.simplify
 	def __sub__(self, other):
 		f = utils.ensure_func(self)
 		g = utils.ensure_func(other)
-
-		fg = ast.BinaryOp(
-			left=f.tree,
-			op=Token(base.MINUS, '-'),
-			right=g.tree
-		)
-		return Func(tree=fg)
+		return Func(tree=utils.minus(f.tree, g.tree))
 
 	@utils.simplify
 	def __rsub__(self, other):
-		return __sub__(other, self)
+		f = utils.ensure_func(other)
+		g = utils.ensure_func(self)
+		return Func(tree=utils.minus(f.tree, g.tree))
 
 	@utils.simplify
 	def __mul__(self, other):
 		f = utils.ensure_func(self)
 		g = utils.ensure_func(other)
-		
-		fg = ast.BinaryOp(
-			left=f.tree,
-			op=Token(base.MUL, '*'),
-			right=g.tree
-		)
-		return Func(tree=fg)
+		return Func(tree=utils.mul(f.tree, g.tree))
 
 	@utils.simplify
 	def __rmul__(self, other):
-		return __mul__(other, self)
+		f = utils.ensure_func(other)
+		g = utils.ensure_func(self)
+		return Func(tree=utils.mul(f.tree, g.tree))
 
 	@utils.simplify
 	def __truediv__(self, other):
 		f = utils.ensure_func(self)
 		g = utils.ensure_func(other)
-		
-		fg = ast.BinaryOp(
-			left=f.tree,
-			op=Token(base.DIV, '/'),
-			right=g.tree
-		)
-		return Func(tree=fg)
+		return Func(tree=utils.div(f.tree, g.tree))
 
 	@utils.simplify
 	def __rtruediv__(self, other):
-		return __truediv__(other, self)
+		f = utils.ensure_func(other)
+		g = utils.ensure_func(self)
+		return Func(tree=utils.div(f.tree, g.tree))
 
 	@utils.simplify
 	def __pow__(self, other):
 		f = utils.ensure_func(self)
 		g = utils.ensure_func(other)
-		
-		fg = ast.BinaryOp(
-			left=f.tree,
-			op=Token(base.POWER, '**'),
-			right=g.tree
-		)
-		return Func(tree=fg)
+		return Func(tree=utils.power(f.tree, g.tree))
 
 	@utils.simplify
 	def __rpow__(self, other):
-		return __pow__(other, self)
+		f = utils.ensure_func(other)
+		g = utils.ensure_func(self)
+		return Func(tree=utils.power(f.tree, g.tree))
 
 	@utils.simplify
 	def __pos__(self):

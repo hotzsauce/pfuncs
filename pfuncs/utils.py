@@ -241,11 +241,13 @@ class NodeFinder(ABCVisitor):
 	"""
 	boolean AST walker that checks if a node type is present in a tree. To be
 	specific, for each node class it checks the:
-		BinaryOp Node 	- operation
-		UnaryOp Node 	- operation
-		Num Node 		- value
-		Var Node 		- variable name
-		Function Node 	- function name
+		BinaryOp Node 			- operation
+		UnaryOp Node 			- operation
+		Num Node 				- value
+		Var Node 				- variable name
+		Function Node 			- function name
+		MultivarFunction Node 	- function name
+		Arg Node 				- checkings arg expression
 	"""
 
 	def __init__(self, tree):
@@ -330,3 +332,43 @@ def ensure_func(f):
 		return call.Func(str(f))
 	else:
 		raise TypeError(repr(f))
+
+
+""" utility functions that make adding nodes to trees quicker """
+def number(value):
+	return ast.Num(Token(NUMBER, value))
+	
+def add(left, right):
+	return ast.BinaryOp(
+		left=left,
+		op=Token(PLUS, '+'),
+		right=right
+	)
+
+def minus(left, right):
+	return ast.BinaryOp(
+		left=left,
+		op=Token(MINUS, '-'),
+		right=right
+	)
+
+def mul(left, right):
+	return ast.BinaryOp(
+		left=left,
+		op=Token(MUL, '*'),
+		right=right
+	)
+
+def div(left, right):
+	return ast.BinaryOp(
+		left=left,
+		op=Token(DIV, '/'),
+		right=right
+	)
+
+def power(left, right):
+	return ast.BinaryOp(
+		left=left,
+		op=Token(POWER, '**'),
+		right=right
+	)
