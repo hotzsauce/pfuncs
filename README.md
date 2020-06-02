@@ -75,18 +75,18 @@ print(mortgage(p=195000, r=rate))    # 646132.112848
 ### Built-in Functions ###
 The following functions are recognized as built-in functions by `pfuncs`:
 
-|    function    |      builtin name       | |   function  |       builtin name      |
-|:---------------|------------------------:| |:------------|------------------------:|
-|       e^x      |         _exp( )_        | | natural log |    _log( )_ or _ln( )_  |
-|   log base 10  |         _log( )_        | | square root |        _sqrt( )_        |
-|   abs. value   |         _abs( )_        | |   signum    |        _sign( )_        |
-|      sine      |         _sin( )_        | |   cosine    |        _cos( )_         |
-|     tangent    |         _tan( )_        | |   arcsine   |       _arcsin( )_       |
-|    arccosine   |       _arccos( )_       | |  arctangent |       _arctan( )_       | 
-|     floor      |        _floor( )_       | |   ceiling   |        _ceil( )_        |
-| error function |         _erf( )_        | |   minimum   |         _min( )_        |
-|     maximum    |        _max( )_         | | normal cdf  | _normcdf(x, mu, sigma)_ |
-|   normal pdf   | _normpdf(x, mu, sigma)_ | |             |                         |
+|    function    |      builtin name       |     |   function  |       builtin name      |
+|:---------------|------------------------:| --- |:------------|------------------------:|
+|       e^x      |         _exp( )_        |     | natural log |    _log( )_ or _ln( )_  |
+|   log base 10  |         _log( )_        |     | square root |        _sqrt( )_        |
+|   abs. value   |         _abs( )_        |     |   signum    |        _sign( )_        |
+|      sine      |         _sin( )_        |     |   cosine    |        _cos( )_         |
+|     tangent    |         _tan( )_        |     |   arcsine   |       _arcsin( )_       |
+|    arccosine   |       _arccos( )_       |     |  arctangent |       _arctan( )_       | 
+|     floor      |        _floor( )_       |     |   ceiling   |        _ceil( )_        |
+| error function |         _erf( )_        |     |   minimum   |         _min( )_        |
+|     maximum    |        _max( )_         |     | normal cdf  | _normcdf(x, mu, sigma)_ |
+|   normal pdf   | _normpdf(x, mu, sigma)_ |     |             |                         |
 
 
 #### Built-in Derivatives ####
