@@ -74,28 +74,23 @@ print(mortgage(p=195000, r=rate))    # 646132.112848
 
 ### Built-in Functions ###
 The following functions are recognized as built-in functions by `pfuncs`:
-* e^x, _exp( )_
-* natural log, _log( )_ or _ln( )_
-* log base 10, _log10( )_
-* square root, _sqrt( )_
-* absolute value, _abs( )_
-* signum function, _sign( )_
-* sine, _sin( )_
-* cosine, _cos( )_
-* tangent, _tan( )_
-* arcsine, _asin( )_
-* arccosine, _acos( )_
-* arctangent, _atan()_
-* floor function, _floor( )_
-* ceiling function, _ceil( )_
-* integer function, _int( )_
-* Gaussian error function, _erf( )_
+|    function    |      builtin name       | |   function  |       builtin name      |
+|:---------------|------------------------:| |:------------|------------------------:|
+|       e^x      |         _exp( )_        | | natural log |    _log( )_ or _ln( )_  |
+|   log base 10  |         _log( )_        | | square root |        _sqrt( )_        |
+|   abs. value   |         _abs( )_        | |   signum    |        _sign( )_        |
+|      sine      |         _sin( )_        | |   cosine    |        _cos( )_         |
+|     tangent    |         _tan( )_        | |   arcsine   |       _arcsin( )_       |
+|    arccosine   |       _arccos( )_       | |  arctangent |       _arctan( )_       | 
+|     floor      |        _floor( )_       | |   ceiling   |        _ceil( )_        |
+| error function |         _erf( )_        | |   minimum   |         _min( )_        |
+|     maximum    |        _max( )_         | | normal cdf  | _normcdf(x, mu, sigma)_ |
+|   normal pdf   | _normpdf(x, mu, sigma)_ | |             |                         |
 
-Additionally, the following are recognized, but not implemented. I didn't really feel like parsing commas & optional parameters yet:
-* minimum, _min(a, b, c, ...)_
-* maximum, _max(a, b, c, ...)_
-* normal cumulative distribution function, _normcdf(x, mu, sigma)_
-* normal probability distribution function, _normcdf(x, mu, sigma)_
+
+#### Built-in Derivatives ####
+
+The _min_, _max_, _normpdf_, and _normcdf_ functions do not have derivatives implemented yet; an error is thrown if the `.derivative` attribute of a Func with one of them is accessed. Following `numpy`'s footsteps of evaluating _sign(0)_ as _0_, the derivative of _abs( )_ is _0_ when the inner expression is _0_. In the same vein, derivatives of _sign_, _floor_, and _ceil_ ignore all discontinuities and return the zero function (i.e. _f'(x)=0_ for all _x_). All other derivatives are as expected. 
 
 
 ### Notes ###
@@ -108,5 +103,4 @@ The parsing & interpreting framework are based almost solely on [Ruslan Spivak's
 
 
 ### To-Do ###
-* Implement the minumum, maximum, CDF, and PDF functions
 * Allow for complex numbers. Went to all that trouble to implement _e_ - might as well make use of it

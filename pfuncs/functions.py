@@ -199,9 +199,6 @@ class Interpreter(alg.Interpreter):
 		if f == CEIL:
 			return np.ceil(self.visit(node.expr))
 
-		if f == INT:
-			return int(self.visit(node.expr))
-
 		if f == ERF:
 			return erf(self.visit(node.expr))
 
